@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/bloc/auth_bloc.dart';
-import '../../network_dashboard/bloc/network_bloc.dart';
+
 import '../widgets/security_score_widget.dart';
 import '../widgets/module_card.dart';
 import '../widgets/status_bar_widget.dart';
@@ -43,6 +43,11 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
                 actions: [
+                  IconButton(
+                    tooltip: 'About Cybe',
+                    icon: const Icon(Icons.info_outline, color: AppTheme.textSecondary),
+                    onPressed: () => _showAboutDialog(context),
+                  ),
                   IconButton(
                     tooltip: 'Lock App',
                     icon: const Icon(Icons.lock_outline, color: AppTheme.textSecondary),
@@ -135,6 +140,82 @@ class DashboardScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              width: 36, height: 36,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppTheme.primaryGradient,
+              ),
+              child: const Icon(Icons.shield, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Cybe Security', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
+                Text('v1.0.0 (Build 1)', style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+              ],
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Cybe is an all-in-one mobile security & privacy suite built for Android and iOS.',
+              style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            const Text('Security Architecture:', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12)),
+            const SizedBox(height: 6),
+            _aboutBullet('AES-256-GCM / CBC zero-knowledge local encryption'),
+            _aboutBullet('PBKDF2 key derivation (100,000 rounds)'),
+            _aboutBullet('Hardware Keystore / Keychain integration'),
+            _aboutBullet('Biometric authentication gate & auto-lock'),
+            const SizedBox(height: 16),
+            const Text('Modules Included:', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12)),
+            const SizedBox(height: 6),
+            _aboutBullet('Password Manager & Generator'),
+            _aboutBullet('Wi-Fi Security & Evil Twin Scanner'),
+            _aboutBullet('File Vault & Encrypted Exporter'),
+            _aboutBullet('Phishing URL Heuristic Checker'),
+            _aboutBullet('Device Vulnerability & Root Auditor'),
+            _aboutBullet('USB Access Monitor'),
+            _aboutBullet('Network Dashboard & Latency Graph'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _aboutBullet(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+          Expanded(child: Text(text, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12))),
+        ],
       ),
     );
   }
