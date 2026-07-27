@@ -225,12 +225,14 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
               const SizedBox(height: 20),
               const Text('Recent Checks', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
+              ..._history.skip(1).take(5).map(_buildHistoryItem),
             ],
-          ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildResult(_CheckResult r) {
     return AnimatedContainer(
