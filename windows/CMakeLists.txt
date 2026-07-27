@@ -2,6 +2,11 @@
 cmake_minimum_required(VERSION 3.14)
 project(cybe_app LANGUAGES CXX)
 
+# Explicitly set nuget executable path for plugins
+if(EXISTS "$ENV{LOCALAPPDATA}/NuGet/nuget.exe")
+  set(NUGET_EXE "$ENV{LOCALAPPDATA}/NuGet/nuget.exe" CACHE PATH "Path to nuget.exe")
+endif()
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "cybe_app")
