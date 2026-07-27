@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -63,8 +64,7 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
   @override
   void initState() {
     super.initState();
-    _scanAnim = AnimationController(vsync: this, duration: const Duration(seconds: 2))
-      ..repeat();
+    _scanAnim = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat();
     _startScan();
   }
 
@@ -76,6 +76,15 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
 
   Future<void> _startScan() async {
     setState(() { _scanning = true; _error = null; });
+
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      setState(() {
+        _scanning = false;
+        _error = 'Wi-Fi radio scanning is optimized for Android & iOS mobile devices. On desktop, check your Network Dashboard for active adapter details.';
+      });
+      return;
+    }
+
     final locationStatus = await Permission.locationWhenInUse.request();
     if (!locationStatus.isGranted) {
       setState(() { _error = 'Location permission is required to scan Wi-Fi networks.'; _scanning = false; });
@@ -147,21 +156,21 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
                   ],
                 ),
               ),
-            // Error message
+            // Error / Desktop info message
             if (_error != null)
               Container(
                 margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppTheme.danger.withOpacity(0.1),
+                  color: AppTheme.warning.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.danger.withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.warning.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: AppTheme.danger),
+                    const Icon(Icons.info_outline, color: AppTheme.warning),
                     const SizedBox(width: 10),
-                    Expanded(child: Text(_error!, style: const TextStyle(color: AppTheme.danger))),
+                    Expanded(child: Text(_error!, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13, height: 1.4))),
                   ],
                 ),
               ),
@@ -261,7 +270,6 @@ class _WifiCard extends StatelessWidget {
                   style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
-              // Security badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -277,7 +285,7 @@ class _WifiCard extends StatelessWidget {
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(Icons.signal_wifi_4_bar, size: 14, color: AppTheme.textSecondary),
+              const Icon(Icons.signal_wifi_4_bar, size: 14, color: AppTheme.textSecondary),
               const SizedBox(width: 4),
               Text('${ap.level} dBm  •  $_signalBars/4 bars', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
               const Spacer(),

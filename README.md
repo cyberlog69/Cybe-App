@@ -1,73 +1,63 @@
 # 🔐 Cybe Security App
 
-A comprehensive **cross-platform mobile security suite** for Android & iOS, built with **Flutter**.
+A comprehensive **cross-platform mobile & desktop security suite** for **Android, iOS, Windows, Linux, and macOS**, built with **Flutter**.
 
-![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-blue)
+![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
-## Features
+## Features & Platform Support
 
-| Module | Description | Platform |
-|--------|-------------|----------|
-| 🔑 **Password Manager** | AES-256 encrypted vault, generator, strength meter | Android + iOS |
-| 📡 **Wi-Fi Scanner** | Security rating, evil twin detection, open network alerts | Android + iOS |
-| 📁 **File Vault** | AES-256-GCM file encryption, sandboxed storage | Android + iOS |
-| 🎣 **Phishing Checker** | URL heuristic + Google Safe Browsing analysis | Android + iOS |
-| 🔍 **Vulnerability Scanner** | Root detection, OS version, permissions audit | Android + iOS |
-| 🔌 **USB Monitor** | Device detection, trust/block, connection history | Android (iOS: guidance) |
-| 📊 **Network Dashboard** | Live latency chart, DNS lookup, connection info | Android + iOS |
+| Module | Description | Supported Platforms |
+|--------|-------------|--------------------|
+| 🔑 **Password Manager** | AES-256 encrypted vault, generator, strength meter | Android • iOS • Windows • Linux • macOS |
+| 📡 **Wi-Fi Scanner** | Security rating, evil twin detection, open network alerts | Android • iOS (Desktop info on PC/Mac) |
+| 📁 **File Vault** | AES-256-GCM file encryption, sandboxed storage | Android • iOS • Windows • Linux • macOS |
+| 🎣 **Phishing Checker** | URL heuristic + Google Safe Browsing analysis | Android • iOS • Windows • Linux • macOS |
+| 🔍 **Vulnerability Scanner** | Root/jailbreak, OS build, system lock, sandbox audit | Android • iOS • Windows • Linux • macOS |
+| 🔌 **USB Monitor** | Device detection, trust/block, connection history | Android (iOS & Desktop security guidance) |
+| 📊 **Network Dashboard** | Live latency chart, DNS lookup, connection info | Android • iOS • Windows • Linux • macOS |
 
 ---
 
-## Setup
+## Setup & Running
 
 ### Prerequisites
-- Flutter SDK (see below)
-- Android Studio (for Android) or Xcode (for iOS)
-- Physical device or emulator
+- Flutter SDK 3.x+
+- Platform build toolchains:
+  - **Android**: Android Studio / SDK
+  - **iOS / macOS**: Xcode (macOS host required)
+  - **Windows**: Visual Studio 2022 (Desktop C++ workload)
+  - **Linux**: `clang`, `cmake`, `ninja-build`, `pkg-config`, `libgtk-3-dev`
 
-### 1. Install Flutter (if not installed)
-```powershell
-# Already downloaded to:
-# C:\Users\<YOU>\flutter\
-
-# Add to PATH:
-$env:PATH += ";C:\Users\$env:USERNAME\flutter\bin"
-```
-
-### 2. Initialize the project
-```powershell
-# From the project directory:
-.\setup.ps1
-```
-
-Or manually:
+### 1. Initialize the project
 ```powershell
 $flutter = "C:\Users\$env:USERNAME\flutter\bin\flutter.bat"
-& $flutter create --org com.cybe --project-name cybe_app --platforms android,ios .
+
+# Generate platform scaffolds
+& $flutter create --org com.cybe --project-name cybe_app --platforms android,ios,windows,linux,macos .
 & $flutter pub get
 ```
 
-### 3. Create asset directories
-```powershell
-mkdir assets\animations, assets\images, assets\icons, assets\fonts
-```
+### 2. Run the application
 
-### 4. Configure API Keys (optional)
-Edit `lib/core/constants/app_constants.dart`:
-```dart
-static const String safeBrowsingApiKey = 'YOUR_GOOGLE_SAFE_BROWSING_API_KEY';
-```
-Get a free key at: https://console.cloud.google.com/apis/library/safebrowsing.googleapis.com
-
-### 5. Run the app
 ```powershell
-& $flutter devices        # List available devices
-& $flutter run            # Run on connected device
-& $flutter run -d <id>    # Run on specific device
+# List available devices (Mobile & Desktop)
+& $flutter devices
+
+# Run on Windows Desktop
+& $flutter run -d windows
+
+# Run on macOS Desktop
+& $flutter run -d macos
+
+# Run on Linux Desktop
+& $flutter run -d linux
+
+# Run on Android / iOS
+& $flutter run -d <device-id>
 ```
 
 ---
@@ -84,7 +74,7 @@ lib/
 │   └── widgets/       # Reusable components
 └── features/
     ├── auth/          # Master password + biometrics
-    ├── dashboard/     # Home with security score
+    ├── dashboard/     # Home with security score & About dialog
     ├── password_manager/
     ├── wifi_scanner/
     ├── file_vault/
@@ -98,20 +88,26 @@ lib/
 
 - **Encryption**: AES-256-GCM for files, AES-256-CBC for passwords
 - **Key derivation**: PBKDF2-SHA256 (100,000 iterations)
-- **Key storage**: iOS Keychain / Android Keystore via `flutter_secure_storage`
-- **Authentication**: Master password + biometrics (Face ID / Fingerprint)
+- **Key storage**: Hardware Keystore / Keychain / Encrypted Storage via `flutter_secure_storage`
+- **Authentication**: Master password + biometrics (Windows Hello / Touch ID / Face ID / Fingerprint)
 - **State management**: BLoC pattern (no sensitive data in UI state)
 
 ## Build for Production
 
 ```powershell
 # Android APK
-& $flutter build apk --release --obfuscate --split-debug-info=./debug-info/
+& $flutter build apk --release
 
-# iOS
-& $flutter build ios --release --obfuscate --split-debug-info=./debug-info/
+# Windows Executable (.exe)
+& $flutter build windows --release
+
+# macOS App (.app / .dmg)
+& $flutter build macos --release
+
+# Linux Executable
+& $flutter build linux --release
 ```
 
 ---
 
-*Built with Flutter · Secured with AES-256 · Designed for privacy*
+*Built with Flutter · Secured with AES-256 · Multi-Platform Desktop & Mobile*
