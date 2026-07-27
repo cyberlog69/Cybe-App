@@ -166,8 +166,9 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _field(String hint, IconData icon, TextEditingController ctrl, {bool required = false}) {
     return TextFormField(

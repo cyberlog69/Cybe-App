@@ -230,8 +230,9 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildResult(_CheckResult r) {
     return AnimatedContainer(

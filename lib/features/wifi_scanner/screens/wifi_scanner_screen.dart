@@ -221,7 +221,8 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
         ),
       ),
     ),
-  }
+  );
+}
 
   Widget _stat(String value, String label, Color color) {
     return Column(
