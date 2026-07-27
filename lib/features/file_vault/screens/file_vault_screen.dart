@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/crypto_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 
 class FileVaultScreen extends StatefulWidget {
   const FileVaultScreen({super.key});
@@ -167,8 +168,10 @@ class _FileVaultScreenState extends State<FileVaultScreen> {
       ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: Column(
-          children: [
+        child: ResponsiveCenter(
+          maxWidth: 1000,
+          child: Column(
+            children: [
             // Header card
             Container(
               margin: const EdgeInsets.all(16),
@@ -294,7 +297,8 @@ class _FileVaultScreenState extends State<FileVaultScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 

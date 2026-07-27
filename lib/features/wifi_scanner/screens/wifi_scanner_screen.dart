@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 
 enum WifiSecurity { open, wep, wpa, wpa2, wpa3 }
 
@@ -134,8 +135,10 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
       ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: Column(
-          children: [
+        child: ResponsiveCenter(
+          maxWidth: 1000,
+          child: Column(
+            children: [
             // Summary bar
             if (_accessPoints.isNotEmpty)
               Container(
@@ -217,7 +220,7 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
           ],
         ),
       ),
-    );
+    ),
   }
 
   Widget _stat(String value, String label, Color color) {

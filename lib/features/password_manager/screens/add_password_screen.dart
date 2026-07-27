@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/crypto_utils.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 import '../bloc/password_bloc.dart';
 
 class AddPasswordScreen extends StatefulWidget {
@@ -49,7 +50,9 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
       ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: Form(
+        child: ResponsiveCenter(
+          maxWidth: 600,
+          child: Form(
           key: _formKey,
           child: ListView(
             padding: const EdgeInsets.all(20),

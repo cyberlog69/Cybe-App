@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:usb_serial/usb_serial.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 
 class _UsbDevice {
   final String vendorId;
@@ -124,7 +125,10 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
       ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: _isAndroid ? _buildAndroidView() : _buildIosView(),
+        child: ResponsiveCenter(
+          maxWidth: 1000,
+          child: _isAndroid ? _buildAndroidView() : _buildIosView(),
+        ),
       ),
     );
   }

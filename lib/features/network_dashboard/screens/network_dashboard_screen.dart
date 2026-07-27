@@ -6,6 +6,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 
 class NetworkDashboardScreen extends StatefulWidget {
   const NetworkDashboardScreen({super.key});
@@ -92,17 +93,20 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
       ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _buildConnectionCard(),
-            const SizedBox(height: 12),
-            _buildLatencyChart(),
-            const SizedBox(height: 12),
-            _buildInfoCard(),
-            const SizedBox(height: 12),
-            _buildDnsLookup(),
-          ],
+        child: ResponsiveCenter(
+          maxWidth: 1000,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _buildConnectionCard(),
+              const SizedBox(height: 12),
+              _buildLatencyChart(),
+              const SizedBox(height: 12),
+              _buildInfoCard(),
+              const SizedBox(height: 12),
+              _buildDnsLookup(),
+            ],
+          ),
         ),
       ),
     );

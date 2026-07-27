@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/crypto_utils.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
@@ -56,8 +56,9 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
         body: Container(
           decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: ResponsiveCenter(
+              maxWidth: 440,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

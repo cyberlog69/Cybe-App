@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/crypto_utils.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
@@ -41,9 +42,12 @@ class _SetupScreenState extends State<SetupScreen> {
         body: Container(
           decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
           child: SafeArea(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              child: _step == 0 ? _buildWelcome() : _buildPasswordSetup(),
+            child: ResponsiveCenter(
+              maxWidth: 480,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: _step == 0 ? _buildWelcome() : _buildPasswordSetup(),
+              ),
             ),
           ),
         ),
@@ -75,7 +79,7 @@ class _SetupScreenState extends State<SetupScreen> {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Your all-in-one mobile security suite.\nPasswords, files, network & more — all protected.',
+            'Your all-in-one mobile & desktop security suite.\nPasswords, files, network & more — all protected.',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppTheme.textSecondary, height: 1.6),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 
 enum UrlThreatLevel { safe, suspicious, phishing, malware, unknown }
 
@@ -158,9 +159,11 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
       appBar: AppBar(title: const Text('Phishing URL Checker'), backgroundColor: AppTheme.background),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveCenter(
+          maxWidth: 1000,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
             // Input card
             Container(
               padding: const EdgeInsets.all(16),
@@ -224,7 +227,7 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
               const SizedBox(height: 10),
               ..._history.skip(1).take(5).map(_buildHistoryItem),
             ],
-          ],
+          ),
         ),
       ),
     );

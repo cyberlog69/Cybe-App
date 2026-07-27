@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/cybe_widgets.dart';
 import '../bloc/password_bloc.dart';
 import '../models/password_entry.dart';
 
@@ -45,8 +46,10 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
       ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
-        child: Column(
-          children: [
+        child: ResponsiveCenter(
+          maxWidth: 1000,
+          child: Column(
+            children: [
             // Search Bar
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -143,6 +146,7 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
           ],
         ),
       ),
+    ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/passwords/add'),
         backgroundColor: AppTheme.primary,

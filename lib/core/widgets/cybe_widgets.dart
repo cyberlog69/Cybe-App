@@ -1,6 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 
+/// Centers content with a responsive maximum width constraint to prevent desktop UI stretching
+class ResponsiveCenter extends StatelessWidget {
+  final Widget child;
+  final double maxWidth;
+  final EdgeInsetsGeometry? padding;
+
+  const ResponsiveCenter({
+    super.key,
+    required this.child,
+    this.maxWidth = 1100,
+    this.padding,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Padding(
+          padding: padding ?? EdgeInsets.zero,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Reusable glassy card with optional neon accent border
 class CybeCard extends StatelessWidget {
   final Widget child;
