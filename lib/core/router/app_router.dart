@@ -13,6 +13,7 @@ import '../../features/phishing_checker/screens/phishing_checker_screen.dart';
 import '../../features/vulnerability_scan/screens/vulnerability_scan_screen.dart';
 import '../../features/usb_monitor/screens/usb_monitor_screen.dart';
 import '../../features/network_dashboard/screens/network_dashboard_screen.dart';
+import '../../features/ble_mesh/screens/ble_mesh_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,6 +42,7 @@ class AppRouter {
       GoRoute(path: '/vulnerability', builder: (context, state) => const VulnerabilityScanScreen()),
       GoRoute(path: '/usb', builder: (context, state) => const UsbMonitorScreen()),
       GoRoute(path: '/network', builder: (context, state) => const NetworkDashboardScreen()),
+      GoRoute(path: '/blemesh', builder: (context, state) => const BleMeshScreen()),
     ],
     redirect: (context, state) {
       final authState = context.read<AuthBloc>().state;

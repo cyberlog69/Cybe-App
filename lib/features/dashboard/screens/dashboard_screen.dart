@@ -137,6 +137,17 @@ class DashboardScreen extends StatelessWidget {
                               route: '/network',
                               subtitle: 'Live monitoring',
                             ),
+                            ModuleCard(
+                              title: 'BitMesh',
+                              icon: Icons.bluetooth_rounded,
+                              gradient: LinearGradient(
+                                colors: [Color(0xFF7B2FBE), Color(0xFF00E5FF)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              route: '/blemesh',
+                              subtitle: 'Off-grid BLE messenger',
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -203,6 +214,8 @@ class DashboardScreen extends StatelessWidget {
             _aboutBullet('Device Vulnerability & Root Auditor'),
             _aboutBullet('USB Access Monitor'),
             _aboutBullet('Network Dashboard & Latency Graph'),
+            _aboutBullet('BitMesh — Off-Grid BLE Mesh Messenger'),
+
           ],
         ),
         actions: [
