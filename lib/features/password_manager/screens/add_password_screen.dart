@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/crypto_utils.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/widgets/cybe_widgets.dart';
 import '../bloc/password_bloc.dart';
+import '../widgets/password_generator_sheet.dart';
+
 
 class AddPasswordScreen extends StatefulWidget {
   final String? editId;
@@ -25,11 +26,8 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
   bool _obscure = true;
   double _strength = 0;
 
-  // Generator state
-  int _genLength = 16;
-  bool _genUpper = true, _genLower = true, _genNums = true, _genSyms = true;
-
   bool get isEditing => widget.editId != null;
+
 
   @override
   void dispose() {
@@ -180,78 +178,17 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
   }
 
   void _showGenerator() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppTheme.surface,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (_) => StatefulBuilder(
-        builder: (ctx, setModal) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Password Generator', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
-              const SizedBox(height: 20),
-              // Length slider
-              Row(
-                children: [
-                  const Text('Length:', style: TextStyle(color: AppTheme.textSecondary)),
-                  Expanded(
-                    child: Slider(
-                      value: _genLength.toDouble(),
-                      min: 8, max: 32, divisions: 24,
-                      activeColor: AppTheme.primary,
-                      onChanged: (v) => setModal(() => _genLength = v.toInt()),
-                    ),
-                  ),
-                  Text('$_genLength', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              _toggleRow('Uppercase (A-Z)', _genUpper, (v) => setModal(() => _genUpper = v)),
-              _toggleRow('Lowercase (a-z)', _genLower, (v) => setModal(() => _genLower = v)),
-              _toggleRow('Numbers (0-9)', _genNums, (v) => setModal(() => _genNums = v)),
-              _toggleRow('Symbols (!@#\$)', _genSyms, (v) => setModal(() => _genSyms = v)),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity, height: 48,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    final pwd = CryptoUtils.generatePassword(
-                      length: _genLength,
-                      uppercase: _genUpper,
-                      lowercase: _genLower,
-                      numbers: _genNums,
-                      symbols: _genSyms,
-                    );
-                    setState(() {
-                      _pwCtrl.text = pwd;
-                      _strength = CryptoUtils.passwordStrength(pwd);
-                    });
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.auto_fix_high),
-                  label: const Text('Generate & Use'),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ),
+    PasswordGeneratorSheet.show(
+      context,
+      onSelectPassword: (pwd) {
+        setState(() {
+          _pwCtrl.text = pwd;
+          _strength = CryptoUtils.passwordStrength(pwd);
+        });
+      },
     );
   }
 
-  Widget _toggleRow(String label, bool value, ValueChanged<bool> onChanged) {
-    return Row(
-      children: [
-        Text(label, style: const TextStyle(color: AppTheme.textSecondary)),
-        const Spacer(),
-        Switch(value: value, onChanged: onChanged),
-      ],
-    );
-  }
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;

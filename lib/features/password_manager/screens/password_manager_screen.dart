@@ -8,6 +8,8 @@ import '../../../core/widgets/cybe_widgets.dart';
 import '../bloc/password_bloc.dart';
 import '../models/password_entry.dart';
 
+import '../widgets/password_generator_sheet.dart';
+
 class PasswordManagerScreen extends StatefulWidget {
   const PasswordManagerScreen({super.key});
   @override
@@ -38,12 +40,18 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
         backgroundColor: AppTheme.background,
         actions: [
           IconButton(
+            icon: const Icon(Icons.auto_fix_high_rounded, color: AppTheme.primary),
+            onPressed: () => PasswordGeneratorSheet.show(context),
+            tooltip: 'Password Generator',
+          ),
+          IconButton(
             icon: const Icon(Icons.add_circle_outline, color: AppTheme.primary),
             onPressed: () => context.push('/passwords/add'),
             tooltip: 'Add Password',
           ),
         ],
       ),
+
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: ResponsiveCenter(
