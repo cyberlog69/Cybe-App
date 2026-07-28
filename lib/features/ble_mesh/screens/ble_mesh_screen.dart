@@ -88,6 +88,11 @@ class _BleMeshScreenState extends State<BleMeshScreen>
         _peers = [];
       });
     } else {
+      // Show platform-not-supported dialog immediately on Windows
+      if (!BleMeshService.isSupported) {
+        _showWindowsNotSupportedDialog();
+        return;
+      }
       setState(() => _isStarting = true);
       try {
         await BleMeshService.instance.start(alias: _alias);
@@ -100,9 +105,15 @@ class _BleMeshScreenState extends State<BleMeshScreen>
         if (mounted) {
           setState(() => _isStarting = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to start BitMesh: $e')),
+            SnackBar(
+              content: Text(e is UnsupportedError
+                  ? 'BLE not supported on this platform'
+                  : 'Failed to start BitMesh: $e'),
+              duration: const Duration(seconds: 4),
+            ),
           );
         }
+
       }
     }
   }
@@ -312,7 +323,75 @@ class _BleMeshScreenState extends State<BleMeshScreen>
     );
   }
 
+  void _showWindowsNotSupportedDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.warning.withValues(alpha: 0.15),
+              ),
+              child: const Icon(Icons.bluetooth_disabled_rounded,
+                  color: AppTheme.warning, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text('Windows BLE Limitation',
+                  style: TextStyle(color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'BitMesh requires a mobile device to function as an active mesh node.',
+              style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, height: 1.5),
+            ),
+            SizedBox(height: 12),
+            Text('Windows Limitation:',
+                style: TextStyle(color: AppTheme.warning,
+                    fontWeight: FontWeight.bold, fontSize: 12)),
+            SizedBox(height: 6),
+            Text(
+              '• Windows 10/11 supports BLE Central mode only\n'
+              '• Cannot advertise as a BLE peripheral\n'
+              '• flutter_blue_plus does not support Windows runtime',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.6),
+            ),
+            SizedBox(height: 12),
+            Text('To use BitMesh:',
+                style: TextStyle(color: AppTheme.primary,
+                    fontWeight: FontWeight.bold, fontSize: 12)),
+            SizedBox(height: 6),
+            Text(
+              '• Install Cybe on Android or iOS\n'
+              '• Open BitMesh and tap Start\n'
+              '• Devices within ~100m will auto-connect',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.6),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ─── Build ──────────────────────────────────────────────────────────────────
+
 
   @override
   Widget build(BuildContext context) {
@@ -435,7 +514,9 @@ class _BleMeshScreenState extends State<BleMeshScreen>
               decoration: BoxDecoration(
                 gradient: _isRunning
                     ? AppTheme.dangerGradient
-                    : AppTheme.primaryGradient,
+                    : !BleMeshService.isSupported
+                        ? AppTheme.warningGradient
+                        : AppTheme.primaryGradient,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: _isStarting
@@ -446,7 +527,11 @@ class _BleMeshScreenState extends State<BleMeshScreen>
                           strokeWidth: 2, color: Colors.white),
                     )
                   : Text(
-                      _isRunning ? 'Stop' : 'Start',
+                      _isRunning
+                          ? 'Stop'
+                          : !BleMeshService.isSupported
+                              ? 'Info'
+                              : 'Start',
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -454,6 +539,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
                     ),
             ),
           ),
+
           const SizedBox(width: 8),
         ],
       ),
@@ -493,53 +579,56 @@ class _BleMeshScreenState extends State<BleMeshScreen>
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _channels.length,
-              itemBuilder: (_, i) {
-                final ch = _channels[i];
-                final isSelected = ch == _currentChannel;
-                final isPublic = (_channelKeys[ch] ?? '') == _kPublicKey;
-                final msgCount = _channelMessages[ch]?.length ?? 0;
-                return ListTile(
-                  dense: true,
-                  selected: isSelected,
-                  selectedTileColor: AppTheme.primary.withOpacity(0.08),
-                  leading: Icon(
-                    isPublic
-                        ? Icons.public_rounded
-                        : Icons.lock_rounded,
-                    size: 14,
-                    color: isSelected
-                        ? AppTheme.primary
-                        : AppTheme.textSecondary,
-                  ),
-                  title: Text(
-                    '#$ch',
-                    style: TextStyle(
+            child: Material(
+              color: Colors.transparent,
+              child: ListView.builder(
+                itemCount: _channels.length,
+                itemBuilder: (_, i) {
+                  final ch = _channels[i];
+                  final isSelected = ch == _currentChannel;
+                  final isPublic = (_channelKeys[ch] ?? '') == _kPublicKey;
+                  final msgCount = _channelMessages[ch]?.length ?? 0;
+                  return ListTile(
+                    dense: true,
+                    selected: isSelected,
+                    selectedTileColor: AppTheme.primary.withValues(alpha: 0.08),
+                    leading: Icon(
+                      isPublic
+                          ? Icons.public_rounded
+                          : Icons.lock_rounded,
+                      size: 14,
                       color: isSelected
                           ? AppTheme.primary
-                          : AppTheme.textPrimary,
-                      fontSize: 13,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                          : AppTheme.textSecondary,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: msgCount > 0
-                      ? Text(
-                          '$msgCount',
-                          style: const TextStyle(
-                              color: AppTheme.textSecondary, fontSize: 10),
-                        )
-                      : null,
-                  onTap: () => setState(() {
-                    _currentChannel = ch;
-                    _currentChannelKey =
-                        _channelKeys[ch] ?? _kPublicKey;
-                  }),
-                );
-              },
+                    title: Text(
+                      '#$ch',
+                      style: TextStyle(
+                        color: isSelected
+                            ? AppTheme.primary
+                            : AppTheme.textPrimary,
+                        fontSize: 13,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: msgCount > 0
+                        ? Text(
+                            '$msgCount',
+                            style: const TextStyle(
+                                color: AppTheme.textSecondary, fontSize: 10),
+                          )
+                        : null,
+                    onTap: () => setState(() {
+                      _currentChannel = ch;
+                      _currentChannelKey =
+                          _channelKeys[ch] ?? _kPublicKey;
+                    }),
+                  );
+                },
+              ),
             ),
           ),
           // Peers section
@@ -561,28 +650,31 @@ class _BleMeshScreenState extends State<BleMeshScreen>
                         style: TextStyle(
                             color: AppTheme.textSecondary, fontSize: 11)),
                   )
-                : ListView.builder(
-                    itemCount: _peers.length,
-                    itemBuilder: (_, i) {
-                      final p = _peers[i];
-                      return ListTile(
-                        dense: true,
-                        leading: Icon(Icons.bluetooth_connected_rounded,
-                            size: 14,
-                            color: p.rssi >= -70
-                                ? AppTheme.safe
-                                : AppTheme.warning),
-                        title: Text(p.name,
-                            style: const TextStyle(
-                                color: AppTheme.textPrimary, fontSize: 12),
-                            overflow: TextOverflow.ellipsis),
-                        subtitle: Text(
-                            '${p.rssi} dBm • ${p.signalLabel}',
-                            style: const TextStyle(
-                                color: AppTheme.textSecondary,
-                                fontSize: 10)),
-                      );
-                    },
+                : Material(
+                    color: Colors.transparent,
+                    child: ListView.builder(
+                      itemCount: _peers.length,
+                      itemBuilder: (_, i) {
+                        final p = _peers[i];
+                        return ListTile(
+                          dense: true,
+                          leading: Icon(Icons.bluetooth_connected_rounded,
+                              size: 14,
+                              color: p.rssi >= -70
+                                  ? AppTheme.safe
+                                  : AppTheme.warning),
+                          title: Text(p.name,
+                              style: const TextStyle(
+                                  color: AppTheme.textPrimary, fontSize: 12),
+                              overflow: TextOverflow.ellipsis),
+                          subtitle: Text(
+                              '${p.rssi} dBm \u2022 ${p.signalLabel}',
+                              style: const TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 10)),
+                        );
+                      },
+                    ),
                   ),
           ),
           const SizedBox(height: 8),

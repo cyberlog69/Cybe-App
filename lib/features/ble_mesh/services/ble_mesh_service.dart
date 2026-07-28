@@ -39,16 +39,30 @@ class BleMeshService {
   String _nodeAlias = 'CybeNode';
 
   // Platform capability
+  /// Whether BLE scanning is supported on this platform.
+  /// flutter_blue_plus supports Android, iOS, macOS and Linux only.
+  /// Windows requires flutter_blue_plus_windows which may not be available at runtime.
+  static bool get isSupported =>
+      Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isLinux;
+
   static bool get canAdvertise =>
       Platform.isAndroid || Platform.isIOS;
 
   bool get isRunning => _isRunning;
   List<BleScanResult> get peers => List.unmodifiable(_peers);
 
+
   /// Start the BitMesh service: begin scanning for nearby Cybe nodes.
   Future<void> start({required String alias}) async {
     if (_isRunning) return;
     _nodeAlias = alias;
+
+    // Guard: flutter_blue_plus only works on Android/iOS/macOS/Linux at runtime
+    if (!isSupported) {
+      debugPrint('[BitMesh] BLE not supported on this platform (${Platform.operatingSystem})');
+      throw UnsupportedError('BLE mesh is not supported on ${Platform.operatingSystem}. Use Android or iOS.');
+    }
+
     _isRunning = true;
 
     try {
@@ -75,7 +89,9 @@ class BleMeshService {
     } catch (e) {
       debugPrint('[BitMesh] Start error: $e');
       _isRunning = false;
+      rethrow;
     }
+
   }
 
   /// Stop scanning and disconnect from all peers
