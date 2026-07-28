@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:usb_serial/usb_serial.dart';
@@ -23,7 +24,7 @@ class _UsbDevice {
     this.isTrusted = false,
   });
 
-  String get displayName => productName ?? manufacturer ?? 'Unknown Device';
+  String get displayName => productName ?? manufacturer ?? 'Unknown USB Device';
 }
 
 class _UsbHistoryEntry {
@@ -41,15 +42,15 @@ class UsbMonitorScreen extends StatefulWidget {
 
 class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
   List<_UsbDevice> _connectedDevices = [];
-  List<_UsbHistoryEntry> _history = [];
-  bool _isAndroid = false;
+  final List<_UsbHistoryEntry> _history = [];
+  bool _isSupported = false;
   Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
-    _isAndroid = Platform.isAndroid;
-    if (_isAndroid) {
+    _isSupported = Platform.isAndroid || Platform.isWindows;
+    if (_isSupported) {
       _startMonitoring();
     }
   }
@@ -62,28 +63,33 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
 
   void _startMonitoring() {
     _scanDevices();
-    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => _scanDevices());
+    _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) => _scanDevices());
   }
 
   Future<void> _scanDevices() async {
-    if (!_isAndroid) return;
     try {
-      final ports = await UsbSerial.listDevices();
-      final newDevices = ports.map((p) => _UsbDevice(
-        vendorId: p.vid?.toRadixString(16).padLeft(4, '0').toUpperCase() ?? 'Unknown',
-        productId: p.pid?.toRadixString(16).padLeft(4, '0').toUpperCase() ?? 'Unknown',
-        manufacturer: p.manufacturerName,
-        productName: p.productName,
-        connectedAt: DateTime.now(),
-      )).toList();
+      List<_UsbDevice> newDevices = [];
+
+      if (Platform.isAndroid) {
+        final ports = await UsbSerial.listDevices();
+        newDevices = ports.map((p) => _UsbDevice(
+          vendorId: p.vid?.toRadixString(16).padLeft(4, '0').toUpperCase() ?? 'Unknown',
+          productId: p.pid?.toRadixString(16).padLeft(4, '0').toUpperCase() ?? 'Unknown',
+          manufacturer: p.manufacturerName,
+          productName: p.productName,
+          connectedAt: DateTime.now(),
+        )).toList();
+      } else if (Platform.isWindows) {
+        newDevices = await _scanWindowsDevices();
+      }
 
       // Detect new connections
       for (final device in newDevices) {
         final alreadyKnown = _connectedDevices.any(
-          (d) => d.vendorId == device.vendorId && d.productId == device.productId);
+          (d) => d.displayName == device.displayName || (d.vendorId != 'N/A' && d.vendorId == device.vendorId && d.productId == device.productId));
         if (!alreadyKnown) {
           _history.insert(0, _UsbHistoryEntry(
-            description: '${device.displayName} (VID:${device.vendorId})',
+            description: '${device.displayName} ${device.vendorId != "N/A" ? "(VID:${device.vendorId})" : ""}',
             time: DateTime.now(),
             connected: true,
           ));
@@ -93,7 +99,7 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
       // Detect disconnections
       for (final old in _connectedDevices) {
         final stillPresent = newDevices.any(
-          (d) => d.vendorId == old.vendorId && d.productId == old.productId);
+          (d) => d.displayName == old.displayName || (d.vendorId != 'N/A' && d.vendorId == old.vendorId && d.productId == old.productId));
         if (!stillPresent) {
           _history.insert(0, _UsbHistoryEntry(
             description: '${old.displayName} disconnected',
@@ -103,9 +109,62 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
         }
       }
 
-      setState(() => _connectedDevices = newDevices);
+      if (mounted) {
+        setState(() => _connectedDevices = newDevices);
+      }
     } catch (e) {
       debugPrint('USB scan error: $e');
+    }
+  }
+
+  Future<List<_UsbDevice>> _scanWindowsDevices() async {
+    try {
+      final result = await Process.run('powershell', [
+        '-NoProfile',
+        '-Command',
+        'Get-PnpDevice -PresentOnly -Class USB,Ports | Select-Object FriendlyName, InstanceId, Status | ConvertTo-Json'
+      ]);
+      if (result.exitCode != 0 || result.stdout.toString().trim().isEmpty) {
+        return [];
+      }
+
+      final String rawJson = result.stdout.toString().trim();
+      dynamic decoded;
+      try {
+        decoded = jsonDecode(rawJson);
+      } catch (_) {
+        return [];
+      }
+
+      final List<dynamic> items = decoded is List ? decoded : [decoded];
+      final devices = <_UsbDevice>[];
+
+      final vidReg = RegExp(r'VID_([0-9A-Fa-f]{4})', caseSensitive: false);
+      final pidReg = RegExp(r'PID_([0-9A-Fa-f]{4})', caseSensitive: false);
+
+      for (final item in items) {
+        if (item is! Map) continue;
+        final name = (item['FriendlyName'] ?? 'USB Device').toString();
+        final instanceId = (item['InstanceId'] ?? '').toString();
+
+        final vidMatch = vidReg.firstMatch(instanceId);
+        final pidMatch = pidReg.firstMatch(instanceId);
+
+        final vid = vidMatch != null ? vidMatch.group(1)!.toUpperCase() : 'N/A';
+        final pid = pidMatch != null ? pidMatch.group(1)!.toUpperCase() : 'N/A';
+
+        devices.add(_UsbDevice(
+          vendorId: vid,
+          productId: pid,
+          productName: name,
+          connectedAt: DateTime.now(),
+        ));
+      }
+
+      return devices;
+    } catch (e) {
+      debugPrint('Windows USB Query error: $e');
+      return [];
     }
   }
 
@@ -118,7 +177,7 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _isAndroid ? _scanDevices : null,
+            onPressed: _isSupported ? _scanDevices : null,
             tooltip: 'Refresh',
           ),
         ],
@@ -127,13 +186,14 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: ResponsiveCenter(
           maxWidth: 1000,
-          child: _isAndroid ? _buildAndroidView() : _buildIosView(),
+          child: _isSupported ? _buildActiveMonitorView() : _buildRestrictedView(),
         ),
       ),
     );
   }
 
-  Widget _buildAndroidView() {
+  Widget _buildActiveMonitorView() {
+    final osLabel = Platform.isWindows ? 'Windows' : 'Android';
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -152,8 +212,8 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('USB Monitor Active', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                    Text('${_connectedDevices.length} device${_connectedDevices.length != 1 ? 's' : ''} connected',
+                    Text('$osLabel USB Monitor Active', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text('${_connectedDevices.length} USB controller / device${_connectedDevices.length != 1 ? 's' : ''} detected',
                       style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
                   ],
                 ),
@@ -172,7 +232,7 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
         const SizedBox(height: 20),
 
         // Connected devices
-        const Text('Connected Devices', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text('Connected USB Devices', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 10),
         if (_connectedDevices.isEmpty)
           Container(
@@ -237,7 +297,7 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
                 ),
                 const SizedBox(width: 10),
                 Expanded(child: Text(e.description, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12))),
-                Text(DateFormat('HH:mm').format(e.time), style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+                Text(DateFormat('HH:mm:ss').format(e.time), style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
               ],
             ),
           ))),
@@ -245,7 +305,7 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
     );
   }
 
-  Widget _buildIosView() {
+  Widget _buildRestrictedView() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -261,10 +321,10 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
               child: const Icon(Icons.usb, color: AppTheme.warning, size: 40),
             ),
             const SizedBox(height: 20),
-            const Text('USB Monitoring Limited on iOS', style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            const Text('USB Security Guidance', style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
             const SizedBox(height: 12),
             const Text(
-              'Apple\'s security sandbox restricts deep USB device access on iOS. For full USB monitoring, use the Android version.\n\nOn iOS, ensure you use "Charge Only" mode when connecting to unknown USB ports to prevent data transfer.',
+              'Real-time hardware USB monitoring is active on Windows and Android.\n\nOn restricted platforms (such as iOS), use charge-only cables and disable data transfer mode when connecting to public ports.',
               style: TextStyle(color: AppTheme.textSecondary, height: 1.6),
               textAlign: TextAlign.center,
             ),
@@ -279,9 +339,9 @@ class _UsbMonitorScreenState extends State<UsbMonitorScreen> {
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('iOS USB Security Tips', style: TextStyle(color: AppTheme.warning, fontWeight: FontWeight.bold)),
+                  Text('USB Security Best Practices', style: TextStyle(color: AppTheme.warning, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
-                  Text('• Tap "Don\'t Trust" when prompted by unknown computers\n• Use a charge-only USB cable for public ports\n• Enable Lockdown Mode for high-security needs\n• Avoid USB-C public charging stations (juice jacking)',
+                  Text('• Never connect untrusted USB drives or unknown cables\n• Use data-blocker USB adaptors for public charging stations\n• Disable USB auto-run / auto-play in operating system settings\n• Keep host OS drivers updated to prevent USB stack vulnerabilities',
                     style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.5)),
                 ],
               ),
@@ -329,7 +389,7 @@ class _DeviceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(device.displayName, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                    Text(device.displayName, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
                     Text('VID: ${device.vendorId}  •  PID: ${device.productId}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
                   ],
                 ),
