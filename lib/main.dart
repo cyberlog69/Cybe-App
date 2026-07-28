@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/bloc/auth_bloc.dart';
@@ -22,6 +23,7 @@ void main() async {
 
 class CybeApp extends StatelessWidget {
   const CybeApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -30,11 +32,17 @@ class CybeApp extends StatelessWidget {
         BlocProvider(create: (_) => PasswordBloc()),
         BlocProvider(create: (_) => NetworkBloc()..add(NetworkMonitoringStarted())),
       ],
-      child: MaterialApp.router(
-        title: 'Cybe Security',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        routerConfig: AppRouter.router,
+      child: DynamicColorBuilder(
+        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+          return MaterialApp.router(
+            title: 'Cybe Security',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.buildTheme(lightDynamic),
+            darkTheme: AppTheme.buildTheme(darkDynamic),
+            themeMode: ThemeMode.system,
+            routerConfig: AppRouter.router,
+          );
+        },
       ),
     );
   }
