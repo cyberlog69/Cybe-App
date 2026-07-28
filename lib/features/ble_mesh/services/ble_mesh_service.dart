@@ -6,7 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../models/mesh_message.dart';
 
 /// Cybe BitMesh — BLE service UUID and characteristic UUIDs
-const String _kServiceUuid = '6e400001-cybe-4d65-0000-000000000001';
+const String _kServiceUuid = '6e400001-c7be-4d65-8000-000000000001';
+
 const String _kTxCharUuidPrefix = '6e400002'; // We write to peers
 const String _kRxCharUuidPrefix = '6e400003'; // We notify on this
 
