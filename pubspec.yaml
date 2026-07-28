@@ -61,12 +61,14 @@ dependencies:
   share_plus: ^10.1.3
 
   # UI & Animations
+  cupertino_icons: ^1.0.8
   fl_chart: ^0.69.0
   lottie: ^3.1.3
   google_fonts: ^6.2.1
   shimmer: ^3.0.0
   animated_text_kit: ^4.2.2
   flutter_svg: ^2.0.10+1
+
 
   # QR Code
   mobile_scanner: ^5.2.3
