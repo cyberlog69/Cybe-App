@@ -1,3 +1,5 @@
+fun org.gradle.api.artifacts.dsl.RepositoryHandler.jcenter(): org.gradle.api.artifacts.repositories.MavenArtifactRepository = mavenCentral()
+
 allprojects {
     repositories {
         google()
@@ -15,6 +17,7 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }
@@ -22,3 +25,4 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
