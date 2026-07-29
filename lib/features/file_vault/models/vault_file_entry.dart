@@ -7,6 +7,7 @@ class VaultFileEntry {
   final String originalExtension;
   final int sizeBytes;
   final DateTime encryptedAt;
+  final String? originalPath;
 
   const VaultFileEntry({
     required this.id,
@@ -15,6 +16,7 @@ class VaultFileEntry {
     required this.originalExtension,
     required this.sizeBytes,
     required this.encryptedAt,
+    this.originalPath,
   });
 
   Map<String, dynamic> toMap() => {
@@ -24,6 +26,7 @@ class VaultFileEntry {
     'originalExtension': originalExtension,
     'sizeBytes': sizeBytes,
     'encryptedAt': encryptedAt.toIso8601String(),
+    'originalPath': originalPath,
   };
 
   factory VaultFileEntry.fromMap(Map<dynamic, dynamic> map) => VaultFileEntry(
@@ -33,5 +36,6 @@ class VaultFileEntry {
     originalExtension: map['originalExtension'] as String,
     sizeBytes: (map['sizeBytes'] as num).toInt(),
     encryptedAt: DateTime.parse(map['encryptedAt'] as String),
+    originalPath: map['originalPath'] as String?,
   );
 }

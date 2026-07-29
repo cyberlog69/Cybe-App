@@ -206,6 +206,8 @@ class _FileVaultView extends StatelessWidget {
         return _VaultFileCard(
           entry: vf,
           isLoading: isLoading,
+          onRestore: () =>
+              context.read<FileVaultBloc>().add(FileVaultRestore(vf)),
           onExport: () =>
               context.read<FileVaultBloc>().add(FileVaultDecrypt(vf)),
           onDelete: () async {
@@ -224,12 +226,14 @@ class _FileVaultView extends StatelessWidget {
 class _VaultFileCard extends StatelessWidget {
   final VaultFileEntry entry;
   final bool isLoading;
+  final VoidCallback onRestore;
   final VoidCallback onExport;
   final VoidCallback onDelete;
 
   const _VaultFileCard({
     required this.entry,
     required this.isLoading,
+    required this.onRestore,
     required this.onExport,
     required this.onDelete,
   });
@@ -316,30 +320,32 @@ class _VaultFileCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppTheme.safe.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: const Text('AES-256',
-                style: TextStyle(
-                    color: AppTheme.safe,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold)),
+          // Decrypt & Restore button
+          IconButton(
+            icon: const Icon(Icons.lock_open_rounded,
+                color: AppTheme.safe, size: 20),
+            tooltip: 'Decrypt & Restore',
+            onPressed: isLoading ? null : onRestore,
           ),
-          const SizedBox(width: 6),
           PopupMenuButton<String>(
             color: AppTheme.surface,
             icon: const Icon(Icons.more_vert,
                 color: AppTheme.textSecondary, size: 20),
             enabled: !isLoading,
             onSelected: (v) {
+              if (v == 'restore') onRestore();
               if (v == 'export') onExport();
               if (v == 'delete') onDelete();
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'restore',
+                child: Row(children: [
+                  Icon(Icons.lock_open_rounded, size: 18, color: AppTheme.safe),
+                  SizedBox(width: 8),
+                  Text('Decrypt & Restore', style: TextStyle(color: AppTheme.safe)),
+                ]),
+              ),
               const PopupMenuItem(
                 value: 'export',
                 child: Row(children: [
@@ -354,7 +360,7 @@ class _VaultFileCard extends StatelessWidget {
                   Icon(Icons.delete_outline,
                       size: 18, color: AppTheme.danger),
                   SizedBox(width: 8),
-                  Text('Delete',
+                  Text('Delete from Vault',
                       style: TextStyle(color: AppTheme.danger)),
                 ]),
               ),

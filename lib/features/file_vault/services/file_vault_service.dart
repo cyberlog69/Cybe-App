@@ -60,9 +60,11 @@ class FileVaultService {
       ..sort((a, b) => b.encryptedAt.compareTo(a.encryptedAt));
   }
 
-  /// Encrypts [filePath] with AES-256-GCM in a background Isolate and
-  /// stores the resulting .cybe file + metadata entry in Hive.
-  Future<VaultFileEntry> importFile(String filePath, String fileName) async {
+  /// Encrypts [filePath] with AES-256-GCM in a background Isolate,
+  /// stores the resulting .cybe file + metadata entry in Hive,
+  /// and deletes the original source file if [deleteOriginal] is true.
+  Future<VaultFileEntry> importFile(String filePath, String fileName,
+      {bool deleteOriginal = true}) async {
     await init();
     final key = await _getVaultKey();
     final plainBytes = await File(filePath).readAsBytes();
@@ -85,9 +87,77 @@ class FileVaultService {
       originalExtension: ext,
       sizeBytes: encrypted.length,
       encryptedAt: DateTime.now(),
+      originalPath: filePath,
     );
     await _box!.put(id, entry.toMap());
+
+    // Delete the original copy so it no longer appears in File Explorer or Gallery
+    if (deleteOriginal) {
+      try {
+        final srcFile = File(filePath);
+        if (await srcFile.exists()) {
+          await srcFile.delete();
+        }
+      } catch (e) {
+        // Log error if file deletion permission is restricted by platform
+      }
+    }
+
     return entry;
+  }
+
+  /// Decrypts [entry] and restores it back to its original path or Downloads directory,
+  /// then removes the encrypted file entry from the vault.
+  Future<String> restoreFile(VaultFileEntry entry) async {
+    await init();
+    final key = await _getVaultKey();
+    final encFile = File(entry.encryptedPath);
+    if (!await encFile.exists()) {
+      throw Exception('Encrypted file not found in vault');
+    }
+
+    final encBytes = await encFile.readAsBytes();
+    final decBytes = await Isolate.run<Uint8List>(
+        () => _runDecrypt([encBytes, key]));
+
+    // Determine target restore location
+    String destPath = '';
+    if (entry.originalPath != null && entry.originalPath!.isNotEmpty) {
+      final parentDir = File(entry.originalPath!).parent;
+      if (await parentDir.exists()) {
+        destPath = entry.originalPath!;
+      }
+    }
+
+    if (destPath.isEmpty) {
+      // Fallback: Restore to Downloads directory
+      if (Platform.isAndroid) {
+        final downloadDir = Directory('/storage/emulated/0/Download');
+        if (await downloadDir.exists()) {
+          destPath = '${downloadDir.path}/${entry.name}';
+        }
+      }
+      if (destPath.isEmpty) {
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir != null && await downloadsDir.exists()) {
+          destPath = '${downloadsDir.path}/${entry.name}';
+        } else {
+          final docsDir = await getApplicationDocumentsDirectory();
+          destPath = '${docsDir.path}/${entry.name}';
+        }
+      }
+    }
+
+    // Write decrypted file back to filesystem
+    final destFile = File(destPath);
+    await destFile.parent.create(recursive: true);
+    await destFile.writeAsBytes(decBytes);
+
+    // Remove from vault
+    if (await encFile.exists()) await encFile.delete();
+    await _box!.delete(entry.id);
+
+    return destPath;
   }
 
   /// Decrypts [entry] in a background Isolate and writes the result to

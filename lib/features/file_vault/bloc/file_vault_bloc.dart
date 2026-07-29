@@ -13,7 +13,18 @@ class FileVaultLoad extends FileVaultEvent {}
 class FileVaultImport extends FileVaultEvent {
   final String filePath;
   final String fileName;
-  FileVaultImport({required this.filePath, required this.fileName});
+  final bool deleteOriginal;
+  FileVaultImport({
+    required this.filePath,
+    required this.fileName,
+    this.deleteOriginal = true,
+  });
+}
+
+/// Requests decryption + restore of a vault [entry] back to filesystem.
+class FileVaultRestore extends FileVaultEvent {
+  final VaultFileEntry entry;
+  FileVaultRestore(this.entry);
 }
 
 /// Requests decryption + share of an existing vault [entry].
@@ -76,6 +87,7 @@ class FileVaultBloc extends Bloc<FileVaultEvent, FileVaultState> {
         super(FileVaultInitial()) {
     on<FileVaultLoad>(_onLoad);
     on<FileVaultImport>(_onImport);
+    on<FileVaultRestore>(_onRestore);
     on<FileVaultDecrypt>(_onDecrypt);
     on<FileVaultDelete>(_onDelete);
   }
@@ -99,14 +111,32 @@ class FileVaultBloc extends Bloc<FileVaultEvent, FileVaultState> {
     emit(FileVaultLoaded(
         files: _currentFiles, operationInProgress: true));
     try {
-      await _service.importFile(event.filePath, event.fileName);
+      await _service.importFile(event.filePath, event.fileName,
+          deleteOriginal: event.deleteOriginal);
       final files = await _service.loadFiles();
       emit(FileVaultLoaded(
           files: files,
-          successMessage: '${event.fileName} encrypted and stored'));
+          successMessage:
+              '${event.fileName} encrypted into vault (original source removed)'));
     } catch (e) {
       emit(FileVaultLoaded(
           files: _currentFiles, error: 'Encryption failed: $e'));
+    }
+  }
+
+  Future<void> _onRestore(
+      FileVaultRestore event, Emitter<FileVaultState> emit) async {
+    emit(FileVaultLoaded(
+        files: _currentFiles, operationInProgress: true));
+    try {
+      final destPath = await _service.restoreFile(event.entry);
+      final files = await _service.loadFiles();
+      emit(FileVaultLoaded(
+          files: files,
+          successMessage: '${event.entry.name} decrypted and restored to $destPath'));
+    } catch (e) {
+      emit(FileVaultLoaded(
+          files: _currentFiles, error: 'Decryption & Restore failed: $e'));
     }
   }
 
