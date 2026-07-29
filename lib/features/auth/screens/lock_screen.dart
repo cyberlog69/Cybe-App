@@ -80,7 +80,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primary.withOpacity(_glowAnim.value),
+                              color: AppTheme.primary.withValues(alpha: _glowAnim.value),
                               blurRadius: 40,
                               spreadRadius: 8,
                             ),

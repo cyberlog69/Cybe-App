@@ -97,7 +97,7 @@ class _BreachMonitorScreenState extends State<BreachMonitorScreen> {
                         children: [
                           const Text('k-Anonymity Dark Web Scanner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                           const SizedBox(height: 4),
-                          Text('Privacy Guaranteed: Plaintext passwords never leave your device.', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                          Text('Privacy Guaranteed: Plaintext passwords never leave your device.', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                         ],
                       ),
                     ),
@@ -213,9 +213,9 @@ class _BreachMonitorScreenState extends State<BreachMonitorScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -434,9 +434,9 @@ class _BleMeshScreenState extends State<BleMeshScreen>
         top: MediaQuery.of(context).padding.top + 8,
         left: 16, right: 8, bottom: 12,
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppTheme.surface,
-        border: const Border(bottom: BorderSide(color: Color(0xFF1E1E30))),
+        border: Border(bottom: BorderSide(color: Color(0xFF1E1E30))),
       ),
       child: Row(
         children: [
@@ -633,9 +633,9 @@ class _BleMeshScreenState extends State<BleMeshScreen>
           ),
           // Peers section
           const Divider(color: Color(0xFF1E1E30)),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: const Text('NEARBY NODES',
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text('NEARBY NODES',
                 style: TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 10,
@@ -687,7 +687,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.surface.withOpacity(0.7),
+        color: AppTheme.surface.withValues(alpha: 0.7),
         border: const Border(bottom: BorderSide(color: Color(0xFF1E1E30))),
       ),
       child: Row(
@@ -711,8 +711,8 @@ class _BleMeshScreenState extends State<BleMeshScreen>
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: isPrivate
-                  ? AppTheme.warning.withOpacity(0.12)
-                  : AppTheme.safe.withOpacity(0.12),
+                  ? AppTheme.warning.withValues(alpha: 0.12)
+                  : AppTheme.safe.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
@@ -743,7 +743,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
   Widget _buildOfflinePrompt() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppTheme.accent.withOpacity(0.12),
+      color: AppTheme.accent.withValues(alpha: 0.12),
       child: Row(
         children: [
           const Icon(Icons.info_outline_rounded,
@@ -775,7 +775,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
                 shape: BoxShape.circle,
                 gradient: AppTheme.primaryGradient.scale(0.15),
                 border: Border.all(
-                  color: AppTheme.primary.withOpacity(0.3),
+                  color: AppTheme.primary.withValues(alpha: 0.3),
                 ),
               ),
               child: const Icon(Icons.bluetooth_searching_rounded,
@@ -897,9 +897,9 @@ class _BleMeshScreenState extends State<BleMeshScreen>
         top: 12,
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppTheme.surface,
-        border: const Border(top: BorderSide(color: Color(0xFF1E1E30))),
+        border: Border(top: BorderSide(color: Color(0xFF1E1E30))),
       ),
       child: Row(
         children: [
@@ -971,7 +971,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
           Container(
             width: 40, height: 4,
             decoration: BoxDecoration(
-              color: AppTheme.textSecondary.withOpacity(0.3),
+              color: AppTheme.textSecondary.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),

@@ -50,11 +50,11 @@ class CybeCard extends StatelessWidget {
         color: AppTheme.cardColor,
         borderRadius: borderRadius ?? BorderRadius.circular(16),
         border: Border.all(
-          color: accentColor?.withOpacity(0.4) ?? const Color(0xFF1E1E30),
+          color: accentColor?.withValues(alpha: 0.4) ?? const Color(0xFF1E1E30),
           width: accentColor != null ? 1.5 : 1,
         ),
         boxShadow: accentColor != null
-            ? [BoxShadow(color: accentColor!.withOpacity(0.1), blurRadius: 16)]
+            ? [BoxShadow(color: accentColor!.withValues(alpha: 0.1), blurRadius: 16)]
             : null,
       ),
       child: Padding(
@@ -76,9 +76,9 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -134,14 +134,14 @@ class _RadarPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    final paint = Paint()..color = color.withOpacity(0.3)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    final paint = Paint()..color = color.withValues(alpha: 0.3)..style = PaintingStyle.stroke..strokeWidth = 1.5;
     canvas.drawCircle(center, radius, paint);
     canvas.drawCircle(center, radius * 0.66, paint);
     canvas.drawCircle(center, radius * 0.33, paint);
 
     // Radar sweep
     final sweepPaint = Paint()
-      ..shader = SweepGradient(colors: [color.withOpacity(0.0), color.withOpacity(0.4)]).createShader(
+      ..shader = SweepGradient(colors: [color.withValues(alpha: 0.0), color.withValues(alpha: 0.4)]).createShader(
         Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.fill;
     canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -1.57, 1.57, true, sweepPaint);

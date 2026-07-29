@@ -36,8 +36,8 @@ class BleMeshService {
   final List<BleScanResult> _peers = [];
 
   StreamSubscription<List<ScanResult>>? _scanSub;
-  bool _isRunning = false;
   String _nodeAlias = 'CybeNode';
+  String get nodeAlias => _nodeAlias;
 
   // Platform capability
   /// Whether BLE scanning is supported on this platform.
