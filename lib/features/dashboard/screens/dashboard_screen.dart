@@ -143,6 +143,17 @@ class DashboardScreen extends StatelessWidget {
                               subtitle: 'Live monitoring',
                             ),
                             ModuleCard(
+                              title: 'BitMesh',
+                              icon: Icons.bluetooth_rounded,
+                              gradient: LinearGradient(
+                                colors: [Color(0xFF7B2FBE), Color(0xFF00E5FF)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              route: '/blemesh',
+                              subtitle: 'Off-grid BLE messenger',
+                            ),
+                            ModuleCard(
                               title: '2FA Authenticator',
                               icon: Icons.shield_rounded,
                               gradient: LinearGradient(colors: [Color(0xFF00E5FF), Color(0xFF00838F)]),
