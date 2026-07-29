@@ -76,7 +76,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: _scoreColor.withOpacity(0.15),
+                              color: _scoreColor.withValues(alpha: 0.15),
                               border: Border.all(color: _scoreColor, width: 3),
                             ),
                             child: Text('${_report!.overallHealthScore}%', style: TextStyle(color: _scoreColor, fontSize: 20, fontWeight: FontWeight.bold)),
@@ -141,7 +141,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
                           decoration: BoxDecoration(
                             color: AppTheme.cardColor,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: color.withOpacity(0.3)),
+                            border: Border.all(color: color.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             children: [

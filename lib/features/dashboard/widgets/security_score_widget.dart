@@ -120,7 +120,7 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
           color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: const Color(0xFF1E1E30)),
-          boxShadow: [BoxShadow(color: _color.withOpacity(0.08), blurRadius: 20)],
+          boxShadow: [BoxShadow(color: _color.withValues(alpha: 0.08), blurRadius: 20)],
         ),
         child: Row(
           children: [
@@ -162,7 +162,7 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
                             currentScore.toInt().toString(),
                             style: TextStyle(color: _color, fontSize: 28, fontWeight: FontWeight.bold),
                           ),
-                          Text('/100', style: TextStyle(color: _color.withOpacity(0.5), fontSize: 11)),
+                          Text('/100', style: TextStyle(color: _color.withValues(alpha: 0.5), fontSize: 11)),
                         ],
                       ),
                     ],
@@ -175,11 +175,11 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Security Score', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
-                      const Icon(Icons.info_outline, size: 16, color: AppTheme.textSecondary),
+                      Text('Security Score', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      Icon(Icons.info_outline, size: 16, color: AppTheme.textSecondary),
                     ],
                   ),
                   const SizedBox(height: 2),

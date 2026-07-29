@@ -130,7 +130,7 @@ class _FileVaultView extends StatelessWidget {
                               Text(
                                 '${files.length} file${files.length != 1 ? 's' : ''} stored securely',
                                 style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                     fontSize: 12)),
                             ],
                           ),
@@ -177,7 +177,7 @@ class _FileVaultView extends StatelessWidget {
           children: [
             Icon(Icons.lock_outline,
                 size: 64,
-                color: AppTheme.textSecondary.withOpacity(0.3)),
+                color: AppTheme.textSecondary.withValues(alpha: 0.3)),
             const SizedBox(height: 12),
             const Text('Your vault is empty',
                 style:
@@ -291,7 +291,7 @@ class _VaultFileCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFF9C27B0).withOpacity(0.15),
+              color: const Color(0xFF9C27B0).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(_fileIcon(entry.originalExtension),
@@ -320,7 +320,7 @@ class _VaultFileCard extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: AppTheme.safe.withOpacity(0.15),
+              color: AppTheme.safe.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(5),
             ),
             child: const Text('AES-256',

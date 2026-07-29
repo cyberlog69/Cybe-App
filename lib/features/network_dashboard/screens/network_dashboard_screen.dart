@@ -130,7 +130,7 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _isConnected ? AppTheme.safe : AppTheme.danger,
-                  boxShadow: [BoxShadow(color: (_isConnected ? AppTheme.safe : AppTheme.danger).withOpacity(0.6), blurRadius: 8)],
+                  boxShadow: [BoxShadow(color: (_isConnected ? AppTheme.safe : AppTheme.danger).withValues(alpha: 0.6), blurRadius: 8)],
                 ),
               ),
               const SizedBox(width: 10),
@@ -140,7 +140,7 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
               if (_hasInternet)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: AppTheme.safe.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
+                  decoration: BoxDecoration(color: AppTheme.safe.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
                   child: const Text('Internet OK', style: TextStyle(color: AppTheme.safe, fontSize: 11, fontWeight: FontWeight.w600)),
                 ),
             ],
@@ -174,13 +174,13 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                 ? const Center(child: Text('Collecting data...', style: TextStyle(color: AppTheme.textSecondary)))
                 : LineChart(LineChartData(
                     gridData: FlGridData(show: true, drawVerticalLine: false,
-                      getDrawingHorizontalLine: (_) => FlLine(color: AppTheme.divider, strokeWidth: 1)),
+                      getDrawingHorizontalLine: (_) => const FlLine(color: AppTheme.divider, strokeWidth: 1)),
                     titlesData: FlTitlesData(
                       leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36,
                         getTitlesWidget: (v, _) => Text(v.toInt().toString(), style: const TextStyle(color: AppTheme.textSecondary, fontSize: 10)))),
-                      bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(show: false),
                     lineBarsData: [
@@ -192,7 +192,7 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: AppTheme.primary.withOpacity(0.1),
+                          color: AppTheme.primary.withValues(alpha: 0.1),
                         ),
                       ),
                     ],

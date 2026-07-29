@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:safe_device/safe_device.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/crypto_utils.dart';
 
 class ScoreFactor {
   final String title;
@@ -104,8 +102,11 @@ class SecurityScoreService {
         .clamp(0, 100);
 
     String label = 'Well Protected';
-    if (total < 50) label = 'High Risk';
-    else if (total < 75) label = 'Needs Attention';
+    if (total < 50) {
+      label = 'High Risk';
+    } else if (total < 75) {
+      label = 'Needs Attention';
+    }
 
     final factors = [
       ScoreFactor(

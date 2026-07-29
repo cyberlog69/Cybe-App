@@ -1052,7 +1052,7 @@ class _DisplayMessage {
 
 // ─── Gradient scale extension ─────────────────────────────────────────────────
 
-extension _GradientScale on LinearGradient {
+extension GradientScale on LinearGradient {
   LinearGradient scale(double opacity) {
     return LinearGradient(
       colors: colors.map((c) => c.withValues(alpha: opacity)).toList(),

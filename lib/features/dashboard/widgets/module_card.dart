@@ -54,7 +54,7 @@ class _ModuleCardState extends State<ModuleCard> with SingleTickerProviderStateM
             border: Border.all(color: const Color(0xFF1E1E30)),
             boxShadow: [
               BoxShadow(
-                color: widget.gradient.colors.first.withOpacity(0.12),
+                color: widget.gradient.colors.first.withValues(alpha: 0.12),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),

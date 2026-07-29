@@ -116,7 +116,7 @@ class _AddPasswordScreenState extends State<AddPasswordScreen> {
               const SizedBox(height: 14),
               // Category dropdown
               DropdownButtonFormField<String>(
-                value: _category,
+                initialValue: _category,
                 dropdownColor: AppTheme.surface,
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: const InputDecoration(

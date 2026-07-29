@@ -134,7 +134,7 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.key_off_rounded, size: 60, color: AppTheme.textSecondary.withOpacity(0.4)),
+                            Icon(Icons.key_off_rounded, size: 60, color: AppTheme.textSecondary.withValues(alpha: 0.4)),
                             const SizedBox(height: 12),
                             const Text('No passwords found', style: TextStyle(color: AppTheme.textSecondary)),
                             const SizedBox(height: 6),
@@ -206,7 +206,7 @@ class _PasswordCardState extends State<_PasswordCard> {
               Container(
                 width: 40, height: 40,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.15),
+                  color: AppTheme.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
@@ -232,7 +232,7 @@ class _PasswordCardState extends State<_PasswordCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppTheme.accent.withOpacity(0.2),
+                  color: AppTheme.accent.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(widget.entry.category,
