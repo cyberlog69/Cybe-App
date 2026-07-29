@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.6.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -30,7 +30,7 @@ dependencies:
   local_auth: ^3.0.2
 
   # Network & Connectivity
-  connectivity_plus: ^6.1.5
+  connectivity_plus: ^7.3.1
   internet_connection_checker_plus: ^3.1.1
   dio: ^5.7.0
   http: ^1.2.2
@@ -95,4 +95,10 @@ dependency_overrides:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/animations/
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/
 

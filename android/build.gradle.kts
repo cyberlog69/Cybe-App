@@ -18,7 +18,7 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 
-    // Auto-patch legacy pub-cache plugins that contain jcenter() or rootProject.allprojects
+    // Auto-patch legacy pub-cache plugins that contain jcenter(), rootProject.allprojects, or stray braces
     val buildGradleFile = file("build.gradle")
     if (buildGradleFile.exists()) {
         var content = buildGradleFile.readText()
@@ -29,6 +29,11 @@ subprojects {
         }
         if (content.contains("rootProject.allprojects")) {
             content = content.replace(Regex("""rootProject\.allprojects\s*\{[\s\S]*?\}"""), "")
+            changed = true
+        }
+        // Fix connectivity_plus malformed build.gradle (stray closing brace after buildscript block)
+        if (content.contains(Regex("""}\n{2,}}\n\napply plugin"""))) {
+            content = content.replace(Regex("""}\n{2,}}\n\napply plugin"""), "}\n\napply plugin")
             changed = true
         }
         if (changed) {

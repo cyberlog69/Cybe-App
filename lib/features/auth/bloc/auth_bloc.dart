@@ -1,36 +1,51 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:equatable/equatable.dart';
 import 'dart:convert';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/crypto_utils.dart';
+import 'package:cybe_app/core/constants/app_constants.dart';
+import 'package:cybe_app/core/utils/crypto_utils.dart';
 
 // ─── Events ────────────────────────────────────────────────────────────────
-abstract class AuthEvent {}
+abstract class AuthEvent extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 class AuthCheckStatus extends AuthEvent {}
 class AuthSetupMasterPassword extends AuthEvent {
   final String password;
   AuthSetupMasterPassword(this.password);
+  @override
+  List<Object?> get props => [password];
 }
 class AuthUnlockWithPassword extends AuthEvent {
   final String password;
   AuthUnlockWithPassword(this.password);
+  @override
+  List<Object?> get props => [password];
 }
 class AuthUnlockWithBiometrics extends AuthEvent {}
 class AuthLockApp extends AuthEvent {}
 
 // ─── States ────────────────────────────────────────────────────────────────
-abstract class AuthState {}
+abstract class AuthState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 class AuthSetupRequired extends AuthState {}
 class AuthLocked extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final DateTime authenticatedAt = DateTime.now();
+  @override
+  List<Object?> get props => [authenticatedAt];
 }
 class AuthError extends AuthState {
   final String message;
   AuthError(this.message);
+  @override
+  List<Object?> get props => [message];
 }
 
 // ─── BLoC ──────────────────────────────────────────────────────────────────

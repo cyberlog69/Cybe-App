@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
+import 'package:cybe_app/core/theme/app_theme.dart';
 
 /// Centers content with a responsive maximum width constraint to prevent desktop UI stretching
 class ResponsiveCenter extends StatelessWidget {
