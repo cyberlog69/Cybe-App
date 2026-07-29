@@ -18,6 +18,24 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 
+    // Auto-patch legacy pub-cache plugins that contain jcenter() or rootProject.allprojects
+    val buildGradleFile = file("build.gradle")
+    if (buildGradleFile.exists()) {
+        var content = buildGradleFile.readText()
+        var changed = false
+        if (content.contains("jcenter()")) {
+            content = content.replace("jcenter()", "mavenCentral()")
+            changed = true
+        }
+        if (content.contains("rootProject.allprojects")) {
+            content = content.replace(Regex("""rootProject\.allprojects\s*\{[\s\S]*?\}"""), "")
+            changed = true
+        }
+        if (changed) {
+            buildGradleFile.writeText(content)
+        }
+    }
+
     afterEvaluate {
         if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
             val android = extensions.findByName("android") as? com.android.build.gradle.BaseExtension
