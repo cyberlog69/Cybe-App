@@ -1,5 +1,3 @@
-fun org.gradle.api.artifacts.dsl.RepositoryHandler.jcenter(): org.gradle.api.artifacts.repositories.MavenArtifactRepository = mavenCentral()
-
 allprojects {
     repositories {
         google()
@@ -38,7 +36,9 @@ subprojects {
 }
 
 subprojects {
-    project.evaluationDependsOn(":app")
+    if (project.name != "app") {
+        project.evaluationDependsOn(":app")
+    }
 }
 
 tasks.register<Delete>("clean") {
