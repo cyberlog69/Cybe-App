@@ -40,6 +40,11 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
         backgroundColor: AppTheme.background,
         actions: [
           IconButton(
+            icon: const Icon(Icons.health_and_safety_outlined, color: AppTheme.primary),
+            onPressed: () => context.push('/password_health'),
+            tooltip: 'Vault Health Audit',
+          ),
+          IconButton(
             icon: const Icon(Icons.auto_fix_high_rounded, color: AppTheme.primary),
             onPressed: () => PasswordGeneratorSheet.show(context),
             tooltip: 'Password Generator',

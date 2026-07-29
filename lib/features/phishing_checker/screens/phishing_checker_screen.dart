@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
 
@@ -408,6 +409,66 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
     }
   }
 
+  Future<void> _scanQrCode(BuildContext context) async {
+    final scannedUrl = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Container(
+        height: 480,
+        decoration: const BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppTheme.divider, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            const Text('Scan URL QR Code', style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            const Text('Point camera at a website or link QR code', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.primary, width: 2),
+                ),
+                child: MobileScanner(
+                  onDetect: (capture) {
+                    final barcodes = capture.barcodes;
+                    for (final barcode in barcodes) {
+                      final raw = barcode.rawValue;
+                      if (raw != null && (raw.startsWith('http://') || raw.startsWith('https://') || raw.contains('.'))) {
+                        Navigator.pop(sheetCtx, raw);
+                        break;
+                      }
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () => Navigator.pop(sheetCtx),
+              icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+              label: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+
+    if (scannedUrl != null && scannedUrl.isNotEmpty && mounted) {
+      _urlCtrl.text = scannedUrl;
+      _checkUrl();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -457,7 +518,7 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 8),
                         IconButton.outlined(
                           onPressed: () async {
                             final data = await Clipboard.getData('text/plain');
@@ -467,6 +528,12 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
                           },
                           icon: const Icon(Icons.paste, color: AppTheme.primary),
                           tooltip: 'Paste from clipboard',
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.outlined(
+                          onPressed: () => _scanQrCode(context),
+                          icon: const Icon(Icons.qr_code_scanner_rounded, color: AppTheme.primary),
+                          tooltip: 'Scan QR Code URL',
                         ),
                       ],
                     ),

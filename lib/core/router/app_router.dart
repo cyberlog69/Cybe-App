@@ -14,6 +14,15 @@ import '../../features/vulnerability_scan/screens/vulnerability_scan_screen.dart
 import '../../features/usb_monitor/screens/usb_monitor_screen.dart';
 import '../../features/network_dashboard/screens/network_dashboard_screen.dart';
 import '../../features/ble_mesh/screens/ble_mesh_screen.dart';
+import '../../features/totp/screens/totp_screen.dart';
+import '../../features/breach_monitor/screens/breach_monitor_screen.dart';
+import '../../features/secret_notes/screens/secret_notes_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
+import '../../features/password_manager/screens/password_health_screen.dart';
+import '../../features/port_scanner/screens/port_scanner_screen.dart';
+import '../../features/ssh_keys/screens/ssh_keys_screen.dart';
+import '../../features/clipboard_manager/screens/clipboard_screen.dart';
+import '../../features/security_logs/screens/security_logs_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -43,6 +52,15 @@ class AppRouter {
       GoRoute(path: '/usb', builder: (context, state) => const UsbMonitorScreen()),
       GoRoute(path: '/network', builder: (context, state) => const NetworkDashboardScreen()),
       GoRoute(path: '/blemesh', builder: (context, state) => const BleMeshScreen()),
+      GoRoute(path: '/totp', builder: (context, state) => const TotpScreen()),
+      GoRoute(path: '/breach_monitor', builder: (context, state) => const BreachMonitorScreen()),
+      GoRoute(path: '/notes', builder: (context, state) => const SecretNotesScreen()),
+      GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+      GoRoute(path: '/password_health', builder: (context, state) => const PasswordHealthScreen()),
+      GoRoute(path: '/port_scanner', builder: (context, state) => const PortScannerScreen()),
+      GoRoute(path: '/ssh_keys', builder: (context, state) => const SshKeysScreen()),
+      GoRoute(path: '/clipboard', builder: (context, state) => const ClipboardScreen()),
+      GoRoute(path: '/security_logs', builder: (context, state) => const SecurityLogsScreen()),
     ],
     redirect: (context, state) {
       final authState = context.read<AuthBloc>().state;

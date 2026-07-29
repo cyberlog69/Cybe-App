@@ -2,27 +2,35 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Web-blue?style=for-the-badge&logo=flutter)](https://flutter.dev)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x%20%7C%20Dart-02569B?style=for-the-badge&logo=flutter)](https://flutter.dev)
-[![Security](https://img.shields.io/badge/Encryption-AES--256--GCM%20%7C%20RSA--2048-brightgreen?style=for-the-badge&logo=shield)](https://github.com/cyberlog69/Cybe-App)
+[![Security](https://img.shields.io/badge/Encryption-AES--256--GCM%20%7C%20RSA--2048%20%7C%20PBKDF2-brightgreen?style=for-the-badge&logo=shield)](https://github.com/cyberlog69/Cybe-App)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 A high-performance, cross-platform cyber-security suite built with **Flutter**, designed to run natively on **Android, iOS, Windows, macOS, Linux, and Web**. 
 
-Cybe offers offline-first encrypted password management, off-grid peer-to-peer BLE mesh messaging (**BitMesh**), network vulnerability auditing, encrypted file vaults, and cryptographically secure password & Diceware passphrase generation (**pass-gen**).
+Cybe offers offline-first encrypted password & developer key management, 2FA TOTP token generation, dark web breach monitoring, off-grid peer-to-peer BLE mesh messaging (**BitMesh**), LAN port scanning, encrypted file vaults, and cryptographically secure password & Diceware passphrase generation (**pass-gen**).
 
 ---
 
-## 🌟 Key Features & Module Overview
+## 🌟 Key Features & 16-Module Security Suite
 
 | Icon | Module | Description | Supported Platforms |
 |:---:|:---|:---|:---:|
-| 🔑 | **Password Manager** | AES-256 encrypted local vault, category filters, fast search & master key protection. | All Platforms |
-| 🎲 | **PassGen Generator** | Offline Diceware Passphrase (~500 EFF wordlist) & Password Generator with entropy calculator and 100B/s GPU crack time estimator. | All Platforms |
-| 📡 | **BitMesh Off-Grid Messaging** | Decentralized peer-to-peer Bluetooth Low Energy (BLE) mesh protocol with RSA-2048 identity handshake & AES-GCM encrypted chat. | Android • iOS • Windows • macOS • Linux |
-| 🛡️ | **Biometric Unlock** | Fingerprint, Face ID, Touch ID, and Windows Hello authentication using `FlutterFragmentActivity` on Android. | Android • iOS • Windows • macOS |
-| 📁 | **Encrypted File Vault** | AES-256-GCM authenticated file encryption for sensitive documents & photos. | All Platforms |
+| 🔑 | **Password Manager** | AES-256 encrypted local vault, category filters, fast search, health audit & master key protection. | All Platforms |
+| 🎲 | **PassGen Generator** | Offline Diceware Passphrase (~500 EFF wordlist) & Password Generator with entropy calculator and GPU crack time estimator. | All Platforms |
+| 🛡️ | **2FA Authenticator** | RFC 6238 TOTP 2FA code generator, 30s countdown ring, tap-to-copy & camera QR import (`mobile_scanner`). | All Platforms |
+| 🌐 | **Dark Web Monitor** | Privacy-preserving k-Anonymity SHA-1 password breach check (HaveIBeenPwned API) + email domain leak auditor. | All Platforms |
+| 🔒 | **Secret Notes** | Dedicated AES-256 encrypted notepad for recovery seeds, API keys & confidential notes with category chips & pinning. | All Platforms |
+| 📁 | **Encrypted File Vault** | AES-256-GCM authenticated file encryption with Isolate background thread execution for sensitive documents & photos. | All Platforms |
+| 📡 | **BitMesh Off-Grid Messaging** | Decentralized P2P BLE mesh protocol with RSA-2048 identity handshake, AES-GCM encrypted chat & Multi-Peer Group Rooms. | Android • iOS • Windows • macOS • Linux |
+| 🔗 | **Phishing & QR Scanner** | URL threat heuristic analysis, brand typosquatting detector & live camera QR code safety analyzer. | All Platforms |
+| 🔍 | **Vulnerability Audit** | 13 deep checks: Root/Jailbreak, security patch staleness, permission exposure (Camera/Mic/Location/Contacts), clipboard sensitivity. | All Platforms |
+| 🖧 | **LAN Port Scanner** | TCP socket probing across common ports (FTP, SSH, Telnet, HTTP, HTTPS, SMB, UPnP, RDP), latency benchmarking & vulnerability alerts. | All Platforms |
+| 🔑 | **SSH & API Key Vault** | Dedicated vault for SSH keys (RSA/Ed25519) and cloud API tokens with automatic SHA-256 key fingerprinting. | All Platforms |
+| 🔌 | **USB Security Monitor** | Real-time USB device connection history, trust/block policies, and hardware interface event logging. | Android • Windows • Linux • macOS |
 | 📊 | **Network Dashboard** | Real-time connection quality inspection, Wi-Fi SSID / local IP / Gateway monitoring, latency tracking chart & DNS Lookup tool. | All Platforms |
-| 🔍 | **Vulnerability Audit** | OS security level, root/jailbreak detection, development mode detection, sandbox integrity check. | All Platforms |
-| 🔌 | **USB Security Monitor** | Real-time USB device connection history, trust/block lists, and hardware interface policy management. | Android • Windows • Linux • macOS |
+| 📶 | **Wi-Fi Threat Radar** | Detects open AP risks, weak WEP/WPA ciphers, and Evil Twin access point suspects. | All Platforms |
+| 💾 | **Secure Clipboard Manager** | In-app 10-item memory-only clipboard history with auto-wipe on app lock/minimize. | All Platforms |
+| ⚙️ | **Settings & Portable Backup** | Material You dynamic theme switcher, auto-lock timeout, biometric preferences, and encrypted `.cybe` vault backup export/restore. | All Platforms |
 
 ---
 
@@ -30,28 +38,31 @@ Cybe offers offline-first encrypted password management, off-grid peer-to-peer B
 
 ```
 lib/
-├── main.dart                  # Application entrypoint & MultiBlocProvider
+├── main.dart                  # Application entrypoint, SettingsBloc & MultiBlocProvider
 ├── core/
-│   ├── theme/                 # Dark cyberpunk theme & color tokens
-│   ├── router/                # Declarative GoRouter navigation
-│   ├── constants/             # App-wide constants & storage keys
-│   ├── utils/                 # CryptoUtils (AES-256-CBC/GCM, PBKDF2, RSA)
+│   ├── theme/                 # AppTheme with Material You M3 dynamic color system
+│   ├── router/                # Declarative GoRouter navigation (16 feature routes)
+│   ├── constants/             # App-wide constants & Hive storage box names
+│   ├── utils/                 # CryptoUtils (AES-256-CBC/GCM, PBKDF2, RSA, SHA-256)
 │   └── widgets/               # ResponsiveCenter, GlassCard, status chips
 └── features/
     ├── auth/                  # Master password hash, setup & biometric lock
-    ├── ble_mesh/              # BitMesh BLE discovery, RSA handshake & P2P chat
-    │   ├── models/            # MeshMessage, MeshPeer, HandshakePayload
-    │   ├── services/          # BleMeshService (BLE Central & Peripheral)
-    │   └── screens/           # BitMesh off-grid chat UI & peer scanner
-    ├── dashboard/             # Dashboard Home, security score & About dialog
-    ├── password_manager/      # Encrypted password vault BLoC & screens
-    │   ├── services/          # PassGenService (EFF Diceware, CSPRNG, Entropy)
-    │   └── widgets/           # PasswordGeneratorSheet (Dual-mode tabbed modal)
-    ├── file_vault/            # AES-256-GCM file encryption & sandboxed vault
+    ├── password_manager/      # Encrypted password vault BLoC, PassGen & Health Audit
+    ├── totp/                  # RFC 6238 2FA TOTP code generator & QR scanner
+    ├── breach_monitor/        # k-Anonymity SHA-1 password breach check service & UI
+    ├── secret_notes/          # AES-256 encrypted notes BLoC, service & screen
+    ├── file_vault/            # Isolate background AES-256-GCM file vault
+    ├── ble_mesh/              # BitMesh BLE discovery, RSA handshake, P2P & Group Rooms
+    ├── phishing_checker/      # URL heuristic analysis & camera QR code safety preview
+    ├── vulnerability_scan/    # 13 deep device risk assessment checks
+    ├── port_scanner/          # Subnet TCP socket port scanner & service fingerprinter
+    ├── ssh_keys/              # Developer SSH key & API token vault with SHA-256 fingerprints
+    ├── usb_monitor/           # USB host device listener, BLoC & Hive history
     ├── network_dashboard/     # Connectivity BLoC, latency charts & DNS tool
-    ├── phishing_checker/      # URL heuristic analysis & domain verification
-    ├── usb_monitor/           # USB host device listener & trust manager
-    └── vulnerability_scan/    # Device health, root detection & OS build audit
+    ├── wifi_scanner/          # Wi-Fi threat scanner & Evil Twin detector
+    ├── clipboard_manager/     # Ephemeral in-app clipboard history & auto-wipe
+    ├── security_logs/         # Centralized security audit log stream & alert badges
+    └── settings/              # Settings BLoC, theme mode, `.cybe` encrypted backup/restore
 ```
 
 ---
@@ -81,7 +92,7 @@ cd Cybe-App
 flutter pub get
 ```
 
-Verify your environment readiness:
+Verify environment readiness:
 ```bash
 flutter doctor
 ```
@@ -91,25 +102,25 @@ flutter doctor
 ### 📱 2. Android Deployment (APK & Google Play AAB)
 
 #### A. Configure Environment
-Set `ANDROID_HOME` environment variable pointing to your Android SDK:
+Set `ANDROID_HOME` environment variable:
 - **Windows (PowerShell)**:
   ```powershell
   $env:ANDROID_HOME="C:\Users\$env:USERNAME\AppData\Local\Android\Sdk"
   [Environment]::SetEnvironmentVariable("ANDROID_HOME", $env:ANDROID_HOME, "User")
   ```
-- **macOS / Linux (Bash/Zsh)**:
+- **macOS / Linux**:
   ```bash
   export ANDROID_HOME=$HOME/Library/Android/sdk
   export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
   ```
 
-#### B. Accept Licenses
+#### B. Accept Android Licenses
 ```bash
 flutter doctor --android-licenses
 ```
 
 #### C. Biometric Setup Note (`FlutterFragmentActivity`)
-This app utilizes `FlutterFragmentActivity` in `android/app/src/main/kotlin/com/cybe/cybe_app/MainActivity.kt` to ensure complete compatibility with `local_auth` biometrics (Fingerprint/Face Unlock). No manual edits required.
+This app utilizes `FlutterFragmentActivity` in `android/app/src/main/kotlin/com/cybe/cybe_app/MainActivity.kt` to ensure complete compatibility with `local_auth` biometrics (Fingerprint/Face Unlock).
 
 #### D. Build Release APK (Standalone Sideloading)
 ```bash
@@ -144,163 +155,68 @@ flutter config --enable-windows-desktop
 flutter build windows --release
 ```
 - **Output Location**: `build/windows/x64/runner/Release/`
-- **Contents**: `cybe_app.exe` along with required DLL runtime libraries.
-
-#### D. Create Standalone Windows Installer (Inno Setup)
-1. Download & install [Inno Setup](https://jrsoftware.org/isinfo.php).
-2. Point Inno Setup script to `build/windows/x64/runner/Release/`.
-3. Compile into a single `CybeSecuritySetup.exe` installer for distribution.
+- **Executable**: `cybe_app.exe` along with required DLL runtime libraries.
 
 ---
 
 ### 🍏 4. iOS Deployment (iPhone & iPad App Store / TestFlight)
 
-#### A. Prerequisites
-Requires a macOS host with **Xcode 15+** installed and an active Apple Developer account.
-
-#### B. CocoaPods Setup
+#### A. CocoaPods Setup
 ```bash
 cd ios
 pod install
 cd ..
 ```
 
-#### C. Configure Signing & Capabilities in Xcode
-1. Open project in Xcode:
-   ```bash
-   open ios/Runner.xcworkspace
-   ```
-2. Select `Runner` in project navigator -> **Signing & Capabilities**.
-3. Select your **Team** and set a unique **Bundle Identifier** (e.g. `com.yourdomain.cybeApp`).
-4. Ensure `NSFaceIDUsageDescription` and `NSBluetoothAlwaysUsageDescription` are specified in `Info.plist`.
-
-#### D. Build IPA Package
+#### B. Xcode Build & Signing
 ```bash
+open ios/Runner.xcworkspace
 flutter build ipa --release
 ```
-- **Output Location**: `build/ios/archive/Runner.xcarchive` and `build/ios/ipa/cybe_app.ipa`
-- **Distribution**: Upload to **TestFlight** or **App Store Connect** using Xcode Organizer or Transporter.
 
 ---
 
 ### 🖥️ 5. macOS Desktop Deployment (.app & .dmg)
 
-#### A. Prerequisites
-macOS host with Xcode command line tools installed.
-
-#### B. Enable macOS Platform
 ```bash
 flutter config --enable-macos-desktop
-```
-
-#### C. Build macOS Release Binary
-```bash
 flutter build macos --release
 ```
 - **Output Location**: `build/macos/Build/Products/Release/cybe_app.app`
-
-#### D. Package into Installable Disk Image (.dmg)
-Install `create-dmg`:
-```bash
-brew install create-dmg
-create-dmg \
-  --volname "Cybe Security" \
-  --window-pos 200 120 \
-  --window-size 800 400 \
-  --icon-size 100 \
-  --icon "cybe_app.app" 200 190 \
-  --hide-extension "cybe_app.app" \
-  --app-drop-link 600 190 \
-  "CybeSecurityInstaller.dmg" \
-  "build/macos/Build/Products/Release/"
-```
 
 ---
 
 ### 🐧 6. Linux Desktop Deployment (Debian / Ubuntu / Snap)
 
-#### A. Install Required Build Dependencies
-On Ubuntu / Debian:
 ```bash
 sudo apt update
 sudo apt install -y clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev
-```
-
-#### B. Enable Linux Platform
-```bash
 flutter config --enable-linux-desktop
-```
-
-#### C. Build Linux Release Binary
-```bash
 flutter build linux --release
 ```
-- **Output Location**: `build/linux/x64/release/bundle/`
-- **Run Standalone Binary**:
-  ```bash
-  ./build/linux/x64/release/bundle/cybe_app
-  ```
+- **Output Location**: `build/linux/x64/release/bundle/cybe_app`
 
 ---
 
 ### 🌐 7. Web Deployment (Progressive Web App)
 
-#### A. Enable Web Platform
 ```bash
 flutter config --enable-web
-```
-
-#### B. Build Web Bundle
-```bash
 flutter build web --release --web-renderer canvaskit
 ```
 - **Output Location**: `build/web/`
-
-#### C. Deploy to Cloud Run / Firebase / Nginx / Vercel
-- **Firebase Hosting**:
-  ```bash
-  npm install -g firebase-tools
-  firebase init hosting
-  # Set public directory to: build/web
-  firebase deploy
-  ```
-- **Nginx Web Server Configuration**:
-  ```nginx
-  server {
-      listen 80;
-      server_name security.yourdomain.com;
-      root /var/www/cybe_app/build/web;
-      index index.html;
-
-      location / {
-          try_files $uri $uri/ /index.html;
-      }
-  }
-  ```
 
 ---
 
 ## 🔒 Security & Cryptography Design
 
-- **Vault Storage Encryption**: AES-256-CBC with random IV per item.
-- **File Encryption**: AES-256-GCM with authenticated tag validation.
+- **Vault Encryption**: AES-256-CBC with random IV per item.
+- **File Vault Encryption**: AES-256-GCM authenticated tag encryption executed inside background Dart Isolates.
 - **Key Derivation**: Master password derived via PBKDF2-SHA256 (100,000 iterations).
-- **Secure Storage**: Device Hardware Keystore (Android EncryptedSharedPreferences, iOS Keychain, Windows Credential Manager).
-- **Off-Grid P2P Encryption (BitMesh)**: Ephemeral RSA-2048 handshake with AES-GCM transport layer.
-- **Memory Safety**: Direct automatic clipboard auto-wiping (30-second security timer).
-
----
-
-## ❓ Troubleshooting & FAQs
-
-#### Q1: Biometric authentication throws `PlatformException(no_fragment_activity)` on Android
-- **Fix**: Verify `android/app/src/main/kotlin/com/cybe/cybe_app/MainActivity.kt` extends `FlutterFragmentActivity` (already implemented).
-
-#### Q2: Kotlin or Android Gradle Plugin (AGP) Version mismatch during build
-- **Fix**: The project uses **AGP 8.11.1** and **Kotlin 2.2.20** configured in `android/settings.gradle.kts`. Use `jni: ^1.0.2` dependency override if needed.
-
-#### Q3: Android build fails with `No Android SDK found`
-- **Fix**: Set `ANDROID_HOME` pointing to your Android SDK directory and ensure `cmdline-tools;latest` is installed via Android Studio SDK Manager.
+- **Dark Web Lookups**: Privacy-preserving k-Anonymity (only 5 SHA-1 hash prefix characters queried; plaintext password never leaves device).
+- **Secure Hardware Storage**: Android EncryptedSharedPreferences, iOS Keychain, Windows Credential Manager.
+- **Off-Grid P2P Encryption (BitMesh)**: Ephemeral RSA-2048 handshake with AES-GCM transport layer & group key rotation.
+- **Memory Safety**: Ephemeral in-app clipboard buffer with automatic wipe on app lock or minimize.
 
 ---
 

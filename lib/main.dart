@@ -8,6 +8,7 @@ import 'core/router/app_router.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/password_manager/bloc/password_bloc.dart';
 import 'features/network_dashboard/bloc/network_bloc.dart';
+import 'features/settings/bloc/settings_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,16 +32,21 @@ class CybeApp extends StatelessWidget {
         BlocProvider(create: (_) => AuthBloc()),
         BlocProvider(create: (_) => PasswordBloc()),
         BlocProvider(create: (_) => NetworkBloc()..add(NetworkMonitoringStarted())),
+        BlocProvider(create: (_) => SettingsBloc()..add(SettingsLoad())),
       ],
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          return MaterialApp.router(
-            title: 'Cybe Security',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.buildTheme(lightDynamic),
-            darkTheme: AppTheme.buildTheme(darkDynamic),
-            themeMode: ThemeMode.system,
-            routerConfig: AppRouter.router,
+          return BlocBuilder<SettingsBloc, SettingsState>(
+            builder: (context, settingsState) {
+              return MaterialApp.router(
+                title: 'Cybe Security',
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.buildTheme(lightDynamic),
+                darkTheme: AppTheme.buildTheme(darkDynamic),
+                themeMode: settingsState.themeMode,
+                routerConfig: AppRouter.router,
+              );
+            },
           );
         },
       ),
