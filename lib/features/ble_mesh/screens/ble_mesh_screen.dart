@@ -1,16 +1,19 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/mesh_message.dart';
-import '../services/ble_mesh_service.dart';
+import '../models/peer_info.dart';
+import '../services/composite_mesh_service.dart';
+import '../services/mesh_service_interface.dart';
 import '../services/mesh_crypto.dart';
 
 const String _kPublicChannel = 'cybe-public';
 const String _kPublicKey = '__PUBLIC_CHANNEL_PLAIN__';
+
+MeshServiceInterface get _meshService => CompositeMeshService.instance;
 
 class BleMeshScreen extends StatefulWidget {
   const BleMeshScreen({super.key});
@@ -36,7 +39,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
   };
   List<String> get _channels => _channelMessages.keys.toList();
 
-  List<BleScanResult> _peers = [];
+  List<MeshPeerInfo> _peers = [];
 
   // ─── Controllers ────────────────────────────────────────────────────────────
   final _messageCtrl = TextEditingController();
@@ -44,7 +47,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulseAnim;
   StreamSubscription<MeshMessage>? _msgSub;
-  StreamSubscription<List<BleScanResult>>? _peerSub;
+  StreamSubscription<List<MeshPeerInfo>>? _peerSub;
 
   @override
   void initState() {
@@ -64,7 +67,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
     _pulseCtrl.dispose();
     _msgSub?.cancel();
     _peerSub?.cancel();
-    if (_isRunning) BleMeshService.instance.stop();
+    if (_isRunning) _meshService.stop();
     super.dispose();
   }
 
@@ -80,7 +83,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
 
   Future<void> _toggleMesh() async {
     if (_isRunning) {
-      await BleMeshService.instance.stop();
+      await _meshService.stop();
       _msgSub?.cancel();
       _peerSub?.cancel();
       setState(() {
@@ -88,16 +91,11 @@ class _BleMeshScreenState extends State<BleMeshScreen>
         _peers = [];
       });
     } else {
-      // Show platform-not-supported dialog immediately on Windows
-      if (!BleMeshService.isSupported) {
-        _showWindowsNotSupportedDialog();
-        return;
-      }
       setState(() => _isStarting = true);
       try {
-        await BleMeshService.instance.start(alias: _alias);
-        _msgSub = BleMeshService.instance.incomingMessages.listen(_onMessageReceived);
-        _peerSub = BleMeshService.instance.discoveredPeers.listen((peers) {
+        await _meshService.start(alias: _alias);
+        _msgSub = _meshService.incomingMessages.listen(_onMessageReceived);
+        _peerSub = _meshService.discoveredPeers.listen((peers) {
           if (mounted) setState(() => _peers = peers);
         });
         if (mounted) setState(() { _isRunning = true; _isStarting = false; });
@@ -106,9 +104,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
           setState(() => _isStarting = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(e is UnsupportedError
-                  ? 'BLE not supported on this platform'
-                  : 'Failed to start BitMesh: $e'),
+              content: Text('Failed to start BitMesh: $e'),
               duration: const Duration(seconds: 4),
             ),
           );
@@ -160,7 +156,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
         ? text
         : MeshCrypto.encrypt(text, _currentChannelKey);
 
-    final delivered = await BleMeshService.instance.sendMessage(
+    final delivered = await _meshService.sendMessage(
       channelName: _currentChannel,
       encryptedData: encrypted,
       senderAlias: _alias,
@@ -323,73 +319,6 @@ class _BleMeshScreenState extends State<BleMeshScreen>
     );
   }
 
-  void _showWindowsNotSupportedDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              width: 36, height: 36,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTheme.warning.withValues(alpha: 0.15),
-              ),
-              child: const Icon(Icons.bluetooth_disabled_rounded,
-                  color: AppTheme.warning, size: 20),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text('Windows BLE Limitation',
-                  style: TextStyle(color: AppTheme.textPrimary,
-                      fontWeight: FontWeight.bold, fontSize: 16)),
-            ),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'BitMesh requires a mobile device to function as an active mesh node.',
-              style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, height: 1.5),
-            ),
-            SizedBox(height: 12),
-            Text('Windows Limitation:',
-                style: TextStyle(color: AppTheme.warning,
-                    fontWeight: FontWeight.bold, fontSize: 12)),
-            SizedBox(height: 6),
-            Text(
-              '• Windows 10/11 supports BLE Central mode only\n'
-              '• Cannot advertise as a BLE peripheral\n'
-              '• flutter_blue_plus does not support Windows runtime',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.6),
-            ),
-            SizedBox(height: 12),
-            Text('To use BitMesh:',
-                style: TextStyle(color: AppTheme.primary,
-                    fontWeight: FontWeight.bold, fontSize: 12)),
-            SizedBox(height: 6),
-            Text(
-              '• Install Cybe on Android or iOS\n'
-              '• Open BitMesh and tap Start\n'
-              '• Devices within ~100m will auto-connect',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.6),
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ─── Build ──────────────────────────────────────────────────────────────────
 
 
@@ -514,9 +443,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
               decoration: BoxDecoration(
                 gradient: _isRunning
                     ? AppTheme.dangerGradient
-                    : !BleMeshService.isSupported
-                        ? AppTheme.warningGradient
-                        : AppTheme.primaryGradient,
+                    : AppTheme.primaryGradient,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: _isStarting
@@ -527,11 +454,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
                           strokeWidth: 2, color: Colors.white),
                     )
                   : Text(
-                      _isRunning
-                          ? 'Stop'
-                          : !BleMeshService.isSupported
-                              ? 'Info'
-                              : 'Start',
+                      _isRunning ? 'Stop' : 'Start',
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -751,9 +674,7 @@ class _BleMeshScreenState extends State<BleMeshScreen>
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              Platform.isWindows
-                  ? 'Press Start to scan for nearby Android/iOS Cybe nodes. Windows can receive messages but cannot be discovered as a relay.'
-                  : 'Press Start to begin scanning for nearby Cybe nodes and enable mesh relay.',
+              'Press Start to begin scanning for nearby Cybe nodes on your local network.',
               style: const TextStyle(
                   color: AppTheme.textSecondary, fontSize: 11),
             ),
