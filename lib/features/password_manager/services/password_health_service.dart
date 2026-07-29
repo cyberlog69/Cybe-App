@@ -35,7 +35,7 @@ class PasswordHealthReport {
 }
 
 class PasswordHealthService {
-  static const _storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  static const _storage = FlutterSecureStorage(aOptions: AndroidOptions());
 
   static Future<PasswordHealthReport> analyzeHealth() async {
     if (!Hive.isBoxOpen(AppConstants.passwordBoxName)) {

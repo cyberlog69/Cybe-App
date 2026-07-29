@@ -7,7 +7,7 @@ import '../models/ssh_key_entry.dart';
 
 class SshKeysService {
   static const _boxName = 'ssh_keys_box';
-  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions());
   Box? _box;
 
   Future<void> init() async {

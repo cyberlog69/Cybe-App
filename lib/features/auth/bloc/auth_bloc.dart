@@ -36,7 +36,7 @@ class AuthError extends AuthState {
 // ─── BLoC ──────────────────────────────────────────────────────────────────
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(),
   );
   final _localAuth = LocalAuthentication();
 
@@ -98,7 +98,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
       final authenticated = await _localAuth.authenticate(
         localizedReason: 'Authenticate to unlock Cybe Security',
-        options: const AuthenticationOptions(biometricOnly: false, stickyAuth: true),
+        biometricOnly: false,
       );
       emit(authenticated ? AuthAuthenticated() : AuthLocked());
     } catch (err) {

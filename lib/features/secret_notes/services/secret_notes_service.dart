@@ -7,7 +7,7 @@ import '../models/secret_note.dart';
 
 class SecretNotesService {
   static const _boxName = 'secret_notes_box';
-  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions());
   Box? _box;
 
   Future<void> init() async {

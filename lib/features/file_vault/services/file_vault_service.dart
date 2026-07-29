@@ -24,7 +24,7 @@ Uint8List _runDecrypt(List<dynamic> args) =>
 class FileVaultService {
   static const _boxName = AppConstants.vaultBoxName;
   final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true));
+    aOptions: AndroidOptions());
 
   Box? _box;
   String? _vaultDir;

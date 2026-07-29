@@ -43,7 +43,7 @@ class PasswordLoaded extends PasswordState {
 class PasswordError extends PasswordState { final String message; PasswordError(this.message); }
 
 class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
-  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  final _storage = const FlutterSecureStorage(aOptions: AndroidOptions());
   Box? _box;
 
   PasswordBloc() : super(PasswordInitial()) {
