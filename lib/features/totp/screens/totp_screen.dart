@@ -131,7 +131,7 @@ class _TotpView extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.shield_outlined, size: 64, color: AppTheme.textSecondary.withOpacity(0.3)),
+                        Icon(Icons.shield_outlined, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.3)),
                         const SizedBox(height: 16),
                         const Text('No 2FA Accounts Configured', style: TextStyle(color: AppTheme.textPrimary, fontSize: 17, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 6),

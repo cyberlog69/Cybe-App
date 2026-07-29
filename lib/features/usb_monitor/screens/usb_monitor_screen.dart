@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -107,7 +107,7 @@ class _UsbMonitorView extends StatelessWidget {
                       '${devices.length} device${devices.length != 1 ? 's' : ''} '
                       '\u2022 ${state.history.length} events logged',
                       style: TextStyle(
-                          color: Colors.white.withOpacity(0.7), fontSize: 12)),
+                          color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
                   ],
                 ),
               ),
@@ -119,7 +119,7 @@ class _UsbMonitorView extends StatelessWidget {
                   color: AppTheme.safe,
                   boxShadow: [
                     BoxShadow(
-                        color: AppTheme.safe.withOpacity(0.6), blurRadius: 8)
+                        color: AppTheme.safe.withValues(alpha: 0.6), blurRadius: 8)
                   ],
                 ),
               ),
@@ -199,7 +199,7 @@ class _UsbMonitorView extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.warning.withOpacity(0.15),
+                  color: AppTheme.warning.withValues(alpha: 0.15),
                 ),
                 child:
                     const Icon(Icons.usb, color: AppTheme.warning, size: 40),
@@ -223,10 +223,10 @@ class _UsbMonitorView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppTheme.warning.withOpacity(0.1),
+                  color: AppTheme.warning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border:
-                      Border.all(color: AppTheme.warning.withOpacity(0.3)),
+                      Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
                 ),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,8 +272,8 @@ class _DeviceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
             color: device.isTrusted
-                ? AppTheme.safe.withOpacity(0.3)
-                : AppTheme.warning.withOpacity(0.3)),
+                ? AppTheme.safe.withValues(alpha: 0.3)
+                : AppTheme.warning.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +286,7 @@ class _DeviceCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: (device.isTrusted ? AppTheme.safe : AppTheme.warning)
-                      .withOpacity(0.15),
+                      .withValues(alpha: 0.15),
                 ),
                 child: Icon(Icons.usb_rounded,
                     color:
@@ -315,7 +315,7 @@ class _DeviceCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:
                       (device.isTrusted ? AppTheme.safe : AppTheme.warning)
-                          .withOpacity(0.15),
+                          .withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -429,7 +429,7 @@ class _HistoryRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _color.withOpacity(0.15)),
+        border: Border.all(color: _color.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [

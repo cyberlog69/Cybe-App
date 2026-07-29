@@ -566,8 +566,8 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: r.threat.color.withOpacity(0.5), width: 1.5),
-        boxShadow: [BoxShadow(color: r.threat.color.withOpacity(0.12), blurRadius: 20)],
+        border: Border.all(color: r.threat.color.withValues(alpha: 0.5), width: 1.5),
+        boxShadow: [BoxShadow(color: r.threat.color.withValues(alpha: 0.12), blurRadius: 20)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -578,7 +578,7 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
                 width: 52, height: 52,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: r.threat.color.withOpacity(0.15),
+                  color: r.threat.color.withValues(alpha: 0.15),
                 ),
                 child: Icon(r.threat.icon, color: r.threat.color, size: 28),
               ),
@@ -596,9 +596,9 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: r.threat.color.withOpacity(0.15),
+                  color: r.threat.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: r.threat.color.withOpacity(0.4)),
+                  border: Border.all(color: r.threat.color.withValues(alpha: 0.4)),
                 ),
                 child: Column(
                   children: [
@@ -636,7 +636,7 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
               color: AppTheme.surfaceVariant,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: f.isNegative ? AppTheme.warning.withOpacity(0.2) : AppTheme.safe.withOpacity(0.2),
+                color: f.isNegative ? AppTheme.warning.withValues(alpha: 0.2) : AppTheme.safe.withValues(alpha: 0.2),
               ),
             ),
             child: Row(
@@ -688,7 +688,7 @@ class _PhishingCheckerScreenState extends State<PhishingCheckerScreen> {
           Expanded(child: Text(r.url, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12), overflow: TextOverflow.ellipsis)),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(color: r.threat.color.withOpacity(0.15), borderRadius: BorderRadius.circular(4)),
+            decoration: BoxDecoration(color: r.threat.color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4)),
             child: Text('Score: ${r.riskScore}', style: TextStyle(color: r.threat.color, fontSize: 10, fontWeight: FontWeight.bold)),
           ),
         ],

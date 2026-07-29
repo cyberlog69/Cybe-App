@@ -268,9 +268,9 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppTheme.warning.withOpacity(0.1),
+                    color: AppTheme.warning.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.warning.withOpacity(0.3)),
+                    border: Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -360,8 +360,8 @@ class _WifiCard extends StatelessWidget {
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isEvilTwin ? AppTheme.danger.withOpacity(0.5)
-            : security.color.withOpacity(0.2),
+          color: isEvilTwin ? AppTheme.danger.withValues(alpha: 0.5)
+            : security.color.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -380,7 +380,7 @@ class _WifiCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: security.color.withOpacity(0.15),
+                  color: security.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(security.label, style: TextStyle(color: security.color, fontSize: 11, fontWeight: FontWeight.bold)),
@@ -404,7 +404,7 @@ class _WifiCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppTheme.danger.withOpacity(0.12),
+                color: AppTheme.danger.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Row(

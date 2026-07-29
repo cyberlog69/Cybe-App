@@ -41,7 +41,7 @@ class TotpService {
       final secret = uri.queryParameters['secret'];
       if (secret == null || secret.isEmpty) return null;
 
-      var label = Uri.decodeComponent(uri.path.substring(1));
+      final label = Uri.decodeComponent(uri.path.substring(1));
       String issuer = uri.queryParameters['issuer'] ?? '';
       String account = label;
 

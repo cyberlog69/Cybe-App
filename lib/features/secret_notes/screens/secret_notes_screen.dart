@@ -163,7 +163,7 @@ class _SecretNotesViewState extends State<_SecretNotesView> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.sticky_note_2_outlined, size: 64, color: AppTheme.textSecondary.withOpacity(0.3)),
+                                  Icon(Icons.sticky_note_2_outlined, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.3)),
                                   const SizedBox(height: 12),
                                   const Text('No Secret Notes Found', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
                                   const SizedBox(height: 6),
@@ -217,7 +217,7 @@ class _NoteCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: note.isPinned ? AppTheme.primary.withOpacity(0.4) : const Color(0xFF1E1E30)),
+        border: Border.all(color: note.isPinned ? AppTheme.primary.withValues(alpha: 0.4) : const Color(0xFF1E1E30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

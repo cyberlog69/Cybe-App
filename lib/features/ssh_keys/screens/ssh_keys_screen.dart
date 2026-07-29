@@ -116,7 +116,7 @@ class _SshKeysView extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.key_outlined, size: 64, color: AppTheme.textSecondary.withOpacity(0.3)),
+                        Icon(Icons.key_outlined, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.3)),
                         const SizedBox(height: 12),
                         const Text('No SSH or API Keys Stored', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 6),

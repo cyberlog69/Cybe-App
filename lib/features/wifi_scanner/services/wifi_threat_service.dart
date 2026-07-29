@@ -33,7 +33,7 @@ class WifiThreatService {
 
     final threats = <String>[];
     final recs = <String>[];
-    var risk = WifiRiskLevel.safe;
+    const risk = WifiRiskLevel.safe;
 
     // Standard Wi-Fi Security Evaluation
     threats.add('Active connection monitored');
