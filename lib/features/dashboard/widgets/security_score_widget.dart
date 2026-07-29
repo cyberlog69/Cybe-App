@@ -20,7 +20,7 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _anim = Tween<double>(begin: 0, end: 0).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
     _loadScore();
   }
@@ -64,27 +64,33 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
               children: [
                 Icon(Icons.shield_rounded, color: _color, size: 28),
                 const SizedBox(width: 12),
-                Text('Security Score Breakdown (${_report!.totalScore}/100)', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('Security Score Breakdown (${_report!.totalScore}/100)',
+                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 16),
             ..._report!.factors.map((f) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(f.title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
-                      Text('${(f.scoreFraction * 100).toInt()}%', style: TextStyle(color: f.scoreFraction >= 0.75 ? AppTheme.safe : AppTheme.warning, fontWeight: FontWeight.bold, fontSize: 12)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(f.title,
+                              style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text('${(f.scoreFraction * 100).toInt()}%',
+                              style: TextStyle(
+                                  color: f.scoreFraction >= 0.75 ? AppTheme.safe : AppTheme.warning,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12)),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(f.tip, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(f.tip, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
-                ],
-              ),
-            )),
+                )),
           ],
         ),
       ),
@@ -106,8 +112,6 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
       );
     }
 
-    final score = _anim.value;
-
     return GestureDetector(
       onTap: () => _showDetailsModal(context),
       child: Container(
@@ -125,30 +129,45 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
               height: 110,
               child: AnimatedBuilder(
                 animation: _anim,
-                builder: (_, __) => Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PieChart(PieChartData(
-                      startDegreeOffset: -90,
-                      sectionsSpace: 0,
-                      centerSpaceRadius: 36,
-                      sections: [
-                        PieChartSectionData(value: score, color: _color, radius: 18, showTitle: false),
-                        PieChartSectionData(value: (100 - score).clamp(0, 100), color: AppTheme.divider, radius: 18, showTitle: false),
-                      ],
-                    )),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          score.toInt().toString(),
-                          style: TextStyle(color: _color, fontSize: 28, fontWeight: FontWeight.bold),
+                builder: (context, child) {
+                  final currentScore = _anim.value;
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      PieChart(
+                        PieChartData(
+                          startDegreeOffset: -90,
+                          sectionsSpace: 0,
+                          centerSpaceRadius: 36,
+                          sections: [
+                            PieChartSectionData(
+                              value: currentScore.clamp(0.1, 100),
+                              color: _color,
+                              radius: 18,
+                              showTitle: false,
+                            ),
+                            PieChartSectionData(
+                              value: (100 - currentScore).clamp(0, 99.9),
+                              color: AppTheme.divider,
+                              radius: 18,
+                              showTitle: false,
+                            ),
+                          ],
                         ),
-                        Text('/100', style: TextStyle(color: _color.withOpacity(0.5), fontSize: 11)),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            currentScore.toInt().toString(),
+                            style: TextStyle(color: _color, fontSize: 28, fontWeight: FontWeight.bold),
+                          ),
+                          Text('/100', style: TextStyle(color: _color.withOpacity(0.5), fontSize: 11)),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(width: 20),
@@ -167,9 +186,9 @@ class _SecurityScoreWidgetState extends State<SecurityScoreWidget>
                   Text(_report!.ratingLabel, style: TextStyle(color: _color, fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   ..._report!.factors.take(4).map((f) => Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: _factor(f.title, f.scoreFraction, f.scoreFraction >= 0.75 ? AppTheme.safe : AppTheme.warning),
-                  )),
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: _factor(f.title, f.scoreFraction, f.scoreFraction >= 0.75 ? AppTheme.safe : AppTheme.warning),
+                      )),
                 ],
               ),
             ),
