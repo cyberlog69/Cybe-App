@@ -35,9 +35,10 @@ dependencies:
   dio: ^5.7.0
   http: ^1.2.2
 
-  # WiFi
+  # WiFi & Cellular Telephony
   wifi_scan: ^0.4.1
   network_info_plus: ^6.0.1
+  carrier_info: ^3.0.0
 
   # Bluetooth Mesh (BitMesh off-grid messenger)
   flutter_blue_plus: ^1.35.3
