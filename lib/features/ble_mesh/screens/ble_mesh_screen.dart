@@ -667,15 +667,15 @@ class _BleMeshScreenState extends State<BleMeshScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       color: AppTheme.accent.withValues(alpha: 0.12),
-      child: Row(
+      child: const Row(
         children: [
-          const Icon(Icons.info_outline_rounded,
+          Icon(Icons.info_outline_rounded,
               color: AppTheme.accent, size: 16),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
               'Press Start to begin scanning for nearby Cybe nodes on your local network.',
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppTheme.textSecondary, fontSize: 11),
             ),
           ),

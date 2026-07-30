@@ -282,6 +282,20 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 15)),
               const Spacer(),
+              if (_carrierInfo.isMultiSimSupported)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  margin: const EdgeInsets.only(right: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text('Multi-SIM',
+                      style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold)),
+                ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -289,7 +303,11 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  _carrierInfo.radioType,
+                  _carrierInfo.activeSlotCount > 1
+                      ? '${_carrierInfo.activeSlotCount} SIMs'
+                      : _carrierInfo.activeSlotCount == 1
+                          ? '1 SIM'
+                          : 'No SIM',
                   style: const TextStyle(
                       color: AppTheme.primary,
                       fontSize: 11,
@@ -306,16 +324,68 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
               ),
             )
+          else if (_carrierInfo.simSlots.isEmpty)
+            _infoRow('Status', 'No cellular connectivity or SIM detected')
           else ...[
-            _infoRow('Carrier Name', _carrierInfo.carrierName),
-            _infoRow('Network Generation', _carrierInfo.networkType),
-            _infoRow('Country Code (ISO)', _carrierInfo.isoCountryCode),
-            _infoRow('MCC / MNC', '${_carrierInfo.mobileCountryCode} / ${_carrierInfo.mobileNetworkCode}'),
-            _infoRow('Phone Number', _carrierInfo.phoneNumber),
+            for (int i = 0; i < _carrierInfo.simSlots.length; i++) ...[
+              if (i > 0) const Divider(height: 20, color: AppTheme.surfaceVariant),
+              _simSlotHeader(_carrierInfo.simSlots[i]),
+              const SizedBox(height: 8),
+              _infoRow('Carrier', _carrierInfo.simSlots[i].carrierName),
+              _infoRow('SIM Type', _carrierInfo.simSlots[i].simType),
+              if (_carrierInfo.simSlots[i].networkGeneration.isNotEmpty &&
+                  _carrierInfo.simSlots[i].networkGeneration != 'Unknown')
+                _infoRow('Network Gen', _carrierInfo.simSlots[i].networkGeneration),
+              if (_carrierInfo.simSlots[i].radioType != 'Unknown')
+                _infoRow('Radio Type', _carrierInfo.simSlots[i].radioType),
+              _infoRow('Country (ISO)', _carrierInfo.simSlots[i].isoCountryCode),
+              _infoRow('MCC / MNC',
+                  '${_carrierInfo.simSlots[i].mobileCountryCode} / ${_carrierInfo.simSlots[i].mobileNetworkCode}'),
+              if (_carrierInfo.simSlots[i].phoneNumber != 'Not Provisioned')
+                _infoRow('Phone Number', _carrierInfo.simSlots[i].phoneNumber),
+              if (_carrierInfo.simSlots[i].isRoaming)
+                _infoRow('Roaming', 'Active'),
+              if (_carrierInfo.simSlots[i].simState != 'Unknown')
+                _infoRow('SIM State', _carrierInfo.simSlots[i].simState),
+            ],
+            const Divider(height: 20, color: AppTheme.surfaceVariant),
             _infoRow('IMEI Status', _carrierInfo.imeiStatus),
+            if (_carrierInfo.supportsEmbeddedSim)
+              _infoRow('eSIM Support', 'Available'),
           ],
         ],
       ),
+    );
+  }
+
+  Widget _simSlotHeader(SimCardInfo sim) {
+    return Row(
+      children: [
+        Icon(
+          sim.isEmbedded ? Icons.sim_card_download_outlined : Icons.sim_card_outlined,
+          size: 18,
+          color: AppTheme.primary,
+        ),
+        const SizedBox(width: 8),
+        Text(sim.simSlotLabel,
+            style: const TextStyle(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 14)),
+        const Spacer(),
+        if (sim.networkGeneration.isNotEmpty && sim.networkGeneration != 'Unknown')
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(sim.networkGeneration,
+                style: const TextStyle(
+                    color: AppTheme.primary, fontSize: 10,
+                    fontWeight: FontWeight.bold)),
+          ),
+      ],
     );
   }
 
