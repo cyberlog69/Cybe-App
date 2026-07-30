@@ -202,6 +202,13 @@ class DashboardScreen extends StatelessWidget {
                               route: '/security_logs',
                               subtitle: 'Audit log & alert stream',
                             ),
+                            ModuleCard(
+                              title: 'App Privacy Guard',
+                              icon: Icons.app_blocking_rounded,
+                              gradient: LinearGradient(colors: [Color(0xFFFF1744), Color(0xFFD50000)]),
+                              route: '/app_audit',
+                              subtitle: 'App permission & risk auditor',
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),

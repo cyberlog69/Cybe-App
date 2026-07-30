@@ -23,6 +23,7 @@ import '../../features/port_scanner/screens/port_scanner_screen.dart';
 import '../../features/ssh_keys/screens/ssh_keys_screen.dart';
 import '../../features/clipboard_manager/screens/clipboard_screen.dart';
 import '../../features/security_logs/screens/security_logs_screen.dart';
+import '../../features/app_audit/screens/app_audit_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -61,6 +62,7 @@ class AppRouter {
       GoRoute(path: '/ssh_keys', builder: (context, state) => const SshKeysScreen()),
       GoRoute(path: '/clipboard', builder: (context, state) => const ClipboardScreen()),
       GoRoute(path: '/security_logs', builder: (context, state) => const SecurityLogsScreen()),
+      GoRoute(path: '/app_audit', builder: (context, state) => const AppAuditScreen()),
     ],
     redirect: (context, state) {
       final authState = context.read<AuthBloc>().state;
