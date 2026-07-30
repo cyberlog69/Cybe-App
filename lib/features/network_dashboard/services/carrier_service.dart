@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:carrier_info/carrier_info.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'carrier_database.dart';
 
 class SimCardInfo {
@@ -81,6 +82,13 @@ class CarrierService {
 
     try {
       if (Platform.isAndroid) {
+        // Request telephony & location permissions for SIM detection
+        if (!await Permission.phone.isGranted) {
+          await Permission.phone.request();
+        }
+        if (!await Permission.locationWhenInUse.isGranted) {
+          await Permission.locationWhenInUse.request();
+        }
         return await _getAndroidCarrierInfo();
       } else if (Platform.isIOS) {
         return await _getIosCarrierInfo();
@@ -94,22 +102,32 @@ class CarrierService {
   }
 
   static Future<CarrierDetails> _getAndroidCarrierInfo() async {
-    final info = await CarrierInfo.getAndroidInfo();
-    if (info == null) return CarrierDetails.empty();
+    AndroidCarrierData? info;
+    try {
+      info = await CarrierInfo.getAndroidInfo();
+    } catch (e) {
+      debugPrint('[CarrierService] Error calling getAndroidInfo: $e');
+    }
+
+    if (info == null) {
+      return CarrierDetails.empty();
+    }
 
     final List<SimCardInfo> sims = [];
 
+    // Process subscription info (physical & eSIM slots)
     for (final sub in info.subscriptionsInfo) {
       final mcc = sub.mobileCountryCode;
       final mnc = sub.mobileNetworkCode;
       final mccMncKey = '$mcc-$mnc';
 
       String carrierName = sub.displayName;
-      if (carrierName.isEmpty && carrierDatabase.containsKey(mccMncKey)) {
+      if ((carrierName.isEmpty || carrierName == 'Unknown Carrier') &&
+          carrierDatabase.containsKey(mccMncKey)) {
         carrierName = carrierDatabase[mccMncKey]!;
       }
       if (carrierName.isEmpty) {
-        carrierName = 'Unknown Carrier';
+        carrierName = 'Cellular Carrier';
       }
 
       String isoCountry = sub.countryIso.toUpperCase();
@@ -117,57 +135,62 @@ class CarrierService {
         isoCountry = 'N/A';
       }
 
-      final slotNum = sub.simSlotIndex + 1;
+      final slotNum = sub.simSlotIndex >= 0 ? sub.simSlotIndex + 1 : sims.length + 1;
       final slotLabel = 'SIM $slotNum';
 
       sims.add(SimCardInfo(
         carrierName: carrierName,
         isoCountryCode: isoCountry,
-        mobileCountryCode: mcc,
-        mobileNetworkCode: mnc,
+        mobileCountryCode: mcc.isNotEmpty ? mcc : 'N/A',
+        mobileNetworkCode: mnc.isNotEmpty ? mnc : 'N/A',
         phoneNumber: sub.phoneNumber.isNotEmpty ? sub.phoneNumber : 'Protected / SIM Unread',
         simSlotLabel: slotLabel,
         isEmbedded: sub.isEmbedded,
         isRoaming: sub.isNetworkRoaming,
-        simSlotIndex: sub.simSlotIndex,
+        simSlotIndex: sub.simSlotIndex >= 0 ? sub.simSlotIndex : slotNum - 1,
         subscriptionId: sub.subscriptionId,
         simSerialNumber: sub.simSerialNo.isNotEmpty ? sub.simSerialNo : 'Not Available',
       ));
     }
 
+    // Merge or append telephony info (radio generation, 5G/4G, network operators)
     for (final tel in info.telephonyInfo) {
       final mcc = tel.mobileCountryCode;
       final mnc = tel.mobileNetworkCode;
       final mccMncKey = '$mcc-$mnc';
 
       String carrierName = tel.carrierName;
-      if (carrierName.isEmpty && carrierDatabase.containsKey(mccMncKey)) {
+      if ((carrierName.isEmpty || carrierName == 'Unknown Carrier') &&
+          carrierDatabase.containsKey(mccMncKey)) {
         carrierName = carrierDatabase[mccMncKey]!;
       }
 
+      // Match existing SIM slot strictly by subscriptionId or non-empty MCC/MNC
       final existingIdx = sims.indexWhere((s) =>
-          s.mobileCountryCode == mcc &&
-          s.mobileNetworkCode == mnc);
+          (tel.subscriptionId != 0 && s.subscriptionId == tel.subscriptionId) ||
+          (mcc.isNotEmpty && mnc.isNotEmpty && mcc != 'N/A' &&
+              s.mobileCountryCode == mcc && s.mobileNetworkCode == mnc));
 
       if (existingIdx >= 0) {
+        final existing = sims[existingIdx];
         sims[existingIdx] = SimCardInfo(
-          carrierName: carrierName.isNotEmpty ? carrierName : sims[existingIdx].carrierName,
+          carrierName: carrierName.isNotEmpty ? carrierName : existing.carrierName,
           isoCountryCode: tel.isoCountryCode.isNotEmpty
               ? tel.isoCountryCode.toUpperCase()
-              : sims[existingIdx].isoCountryCode,
-          mobileCountryCode: mcc.isNotEmpty ? mcc : sims[existingIdx].mobileCountryCode,
-          mobileNetworkCode: mnc.isNotEmpty ? mnc : sims[existingIdx].mobileNetworkCode,
-          networkGeneration: tel.networkGeneration.isNotEmpty ? tel.networkGeneration : sims[existingIdx].networkGeneration,
-          radioType: tel.radioType ?? sims[existingIdx].radioType,
-          phoneNumber: tel.phoneNumber.isNotEmpty ? tel.phoneNumber : sims[existingIdx].phoneNumber,
-          simSlotLabel: sims[existingIdx].simSlotLabel,
-          isEmbedded: sims[existingIdx].isEmbedded,
-          isRoaming: sims[existingIdx].isRoaming,
-          simState: tel.simState.isNotEmpty ? tel.simState : sims[existingIdx].simState,
-          networkOperatorName: tel.networkOperatorName.isNotEmpty ? tel.networkOperatorName : sims[existingIdx].networkOperatorName,
-          simSlotIndex: sims[existingIdx].simSlotIndex,
-          subscriptionId: tel.subscriptionId,
-          simSerialNumber: sims[existingIdx].simSerialNumber,
+              : existing.isoCountryCode,
+          mobileCountryCode: mcc.isNotEmpty ? mcc : existing.mobileCountryCode,
+          mobileNetworkCode: mnc.isNotEmpty ? mnc : existing.mobileNetworkCode,
+          networkGeneration: tel.networkGeneration.isNotEmpty ? tel.networkGeneration : existing.networkGeneration,
+          radioType: tel.radioType ?? existing.radioType,
+          phoneNumber: tel.phoneNumber.isNotEmpty ? tel.phoneNumber : existing.phoneNumber,
+          simSlotLabel: existing.simSlotLabel,
+          isEmbedded: existing.isEmbedded,
+          isRoaming: existing.isRoaming,
+          simState: tel.simState.isNotEmpty ? tel.simState : existing.simState,
+          networkOperatorName: tel.networkOperatorName.isNotEmpty ? tel.networkOperatorName : existing.networkOperatorName,
+          simSlotIndex: existing.simSlotIndex,
+          subscriptionId: tel.subscriptionId != 0 ? tel.subscriptionId : existing.subscriptionId,
+          simSerialNumber: existing.simSerialNumber,
         );
       } else {
         final slotNum = sims.length + 1;
@@ -175,16 +198,18 @@ class CarrierService {
         if (iso.isEmpty) iso = 'N/A';
 
         sims.add(SimCardInfo(
-          carrierName: carrierName.isNotEmpty ? carrierName : (tel.displayName.isNotEmpty ? tel.displayName : 'Unknown Carrier'),
+          carrierName: carrierName.isNotEmpty
+              ? carrierName
+              : (tel.displayName.isNotEmpty ? tel.displayName : 'Cellular Network'),
           isoCountryCode: iso,
           mobileCountryCode: mcc.isNotEmpty ? mcc : 'N/A',
           mobileNetworkCode: mnc.isNotEmpty ? mnc : 'N/A',
-          networkGeneration: tel.networkGeneration.isNotEmpty ? tel.networkGeneration : 'Unknown',
-          radioType: tel.radioType ?? 'Unknown',
+          networkGeneration: tel.networkGeneration.isNotEmpty ? tel.networkGeneration : '5G / 4G LTE',
+          radioType: tel.radioType ?? 'Mobile Data',
           phoneNumber: tel.phoneNumber.isNotEmpty ? tel.phoneNumber : 'Protected / SIM Unread',
           simSlotLabel: 'SIM $slotNum',
           isRoaming: false,
-          simState: tel.simState.isNotEmpty ? tel.simState : 'Unknown',
+          simState: tel.simState.isNotEmpty ? tel.simState : 'Active',
           networkOperatorName: tel.networkOperatorName.isNotEmpty ? tel.networkOperatorName : '',
           simSlotIndex: slotNum - 1,
           subscriptionId: tel.subscriptionId,

@@ -7,6 +7,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../services/carrier_service.dart';
 import '../services/speed_test_service.dart';
 
@@ -324,8 +325,22 @@ class _NetworkDashboardScreenState extends State<NetworkDashboardScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
               ),
             )
-          else if (_carrierInfo.simSlots.isEmpty)
-            _infoRow('Status', 'No cellular connectivity or SIM detected')
+          else if (_carrierInfo.simSlots.isEmpty) ...[
+            _infoRow('Status', 'No SIM card detected or permission required'),
+            const SizedBox(height: 10),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await Permission.phone.request();
+                  await Permission.locationWhenInUse.request();
+                  _loadCarrierInfo();
+                },
+                icon: const Icon(Icons.sim_card_rounded, size: 16),
+                label: const Text('Detect SIM Cards & Grant Permission',
+                    style: TextStyle(fontSize: 12)),
+              ),
+            ),
+          ]
           else ...[
             for (int i = 0; i < _carrierInfo.simSlots.length; i++) ...[
               if (i > 0) const Divider(height: 20, color: AppTheme.surfaceVariant),
