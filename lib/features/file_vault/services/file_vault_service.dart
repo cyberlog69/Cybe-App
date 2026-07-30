@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/utils/crypto_utils.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/vault_file_entry.dart';
+import '../../security_logs/services/security_log_service.dart';
 
 // Isolate-friendly top-level encrypt/decrypt helpers
 Uint8List _runEncrypt(List<dynamic> args) =>
@@ -103,6 +104,13 @@ class FileVaultService {
       }
     }
 
+    await SecurityLogService.logEvent(
+      title: 'File Encrypted & Vaulted',
+      message: 'Encrypted "${entry.name}" (${(entry.sizeBytes / 1024).toStringAsFixed(1)} KB) into AES-256 vault.',
+      severity: 'safe',
+      category: 'Vault',
+    );
+
     return entry;
   }
 
@@ -156,6 +164,13 @@ class FileVaultService {
     // Remove from vault
     if (await encFile.exists()) await encFile.delete();
     await _box!.delete(entry.id);
+
+    await SecurityLogService.logEvent(
+      title: 'File Decrypted & Restored',
+      message: 'Restored "${entry.name}" to $destPath.',
+      severity: 'info',
+      category: 'Vault',
+    );
 
     return destPath;
   }

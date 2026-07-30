@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'dart:convert';
 import 'package:cybe_app/core/constants/app_constants.dart';
 import 'package:cybe_app/core/utils/crypto_utils.dart';
+import 'package:cybe_app/features/security_logs/services/security_log_service.dart';
 
 // ─── Events ────────────────────────────────────────────────────────────────
 abstract class AuthEvent extends Equatable {
@@ -81,6 +82,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _storage.write(key: AppConstants.masterSaltKey, value: salt);
       await _storage.write(key: AppConstants.encryptionKeyKey, value: base64.encode(encKey));
       await _storage.write(key: AppConstants.vaultKeyKey, value: base64.encode(vaultKey));
+      await SecurityLogService.logEvent(
+        title: 'Master Password Initialized',
+        message: 'PBKDF2 master salt and 256-bit encryption keys generated.',
+        severity: 'safe',
+        category: 'Auth',
+      );
       emit(AuthAuthenticated());
     } catch (err) {
       emit(AuthError('Setup failed: $err'));
@@ -94,8 +101,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (hash == null || salt == null) { emit(AuthSetupRequired()); return; }
     final valid = CryptoUtils.verifyPassword(e.password, salt, hash);
     if (valid) {
+      await SecurityLogService.logEvent(
+        title: 'App Unlocked (Password)',
+        message: 'Master password verification passed successfully.',
+        severity: 'safe',
+        category: 'Auth',
+      );
       emit(AuthAuthenticated());
     } else {
+      await SecurityLogService.logEvent(
+        title: 'Password Unlock Failed',
+        message: 'Incorrect master password attempt detected.',
+        severity: 'warning',
+        category: 'Auth',
+      );
       emit(AuthError('Incorrect master password'));
       await Future.delayed(const Duration(milliseconds: 400));
       emit(AuthLocked());
@@ -115,8 +134,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         localizedReason: 'Authenticate to unlock Cybe Security',
         biometricOnly: false,
       );
-      emit(authenticated ? AuthAuthenticated() : AuthLocked());
+      if (authenticated) {
+        await SecurityLogService.logEvent(
+          title: 'App Unlocked (Biometric)',
+          message: 'Biometric fingerprint/face challenge passed.',
+          severity: 'safe',
+          category: 'Auth',
+        );
+        emit(AuthAuthenticated());
+      } else {
+        await SecurityLogService.logEvent(
+          title: 'Biometric Unlock Cancelled',
+          message: 'Biometric authentication challenge was cancelled or failed.',
+          severity: 'warning',
+          category: 'Auth',
+        );
+        emit(AuthLocked());
+      }
     } catch (err) {
+      await SecurityLogService.logEvent(
+        title: 'Biometric Error',
+        message: 'Biometric authentication error: $err',
+        severity: 'critical',
+        category: 'Auth',
+      );
       emit(AuthError('Biometric error: $err'));
       await Future.delayed(const Duration(milliseconds: 400));
       emit(AuthLocked());

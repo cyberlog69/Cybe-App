@@ -9,6 +9,7 @@ class AppConstants {
   static const String networkLogBoxName = 'network_log_box';
   static const String phishingHistoryBoxName = 'phishing_history_box';
   static const String usbHistoryBoxName = 'usb_history_box';
+  static const String securityLogsBoxName = 'security_logs_box';
 
   // Secure storage keys
   static const String masterPasswordHashKey = 'master_pw_hash';
