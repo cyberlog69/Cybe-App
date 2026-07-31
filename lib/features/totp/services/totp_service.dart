@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../security_logs/services/security_log_service.dart';
 import '../models/totp_item.dart';
 
 class TotpService {
@@ -10,6 +11,24 @@ class TotpService {
       _box = await Hive.openBox(_boxName);
     } else {
       _box = Hive.box(_boxName);
+    }
+    await _seedDefault2faIfEmpty();
+  }
+
+  Future<void> _seedDefault2faIfEmpty() async {
+    if (_box!.isEmpty) {
+      final demo1 = TotpItem.create(
+        issuer: 'Google',
+        accountName: 'user@gmail.com',
+        secret: 'JBSWY3DPEHPK3PXP',
+      );
+      final demo2 = TotpItem.create(
+        issuer: 'GitHub',
+        accountName: 'cyberlog69',
+        secret: 'HXDMVJECJJWSRB3L',
+      );
+      await _box!.put(demo1.id, demo1.toMap());
+      await _box!.put(demo2.id, demo2.toMap());
     }
   }
 
@@ -25,10 +44,27 @@ class TotpService {
   Future<void> addItem(TotpItem item) async {
     await init();
     await _box!.put(item.id, item.toMap());
+
+    await SecurityLogService.logEvent(
+      title: '2FA Token Added',
+      message: 'Created 2FA authenticator entry for "${item.issuer}" (${item.accountName}).',
+      severity: 'safe',
+      category: 'Auth',
+    );
   }
 
   Future<void> deleteItem(String id) async {
     await init();
+    final rawMap = _box!.get(id);
+    if (rawMap != null && rawMap is Map) {
+      final item = TotpItem.fromMap(rawMap);
+      await SecurityLogService.logEvent(
+        title: '2FA Token Removed',
+        message: 'Deleted 2FA entry for "${item.issuer}" (${item.accountName}).',
+        severity: 'info',
+        category: 'Auth',
+      );
+    }
     await _box!.delete(id);
   }
 
