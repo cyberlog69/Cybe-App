@@ -216,6 +216,13 @@ class DashboardScreen extends StatelessWidget {
                               route: '/mitm_shield',
                               subtitle: 'MitM & ARP spoofing detector',
                             ),
+                            ModuleCard(
+                              title: 'Anti-Spyware Guard',
+                              icon: Icons.camera_indoor_rounded,
+                              gradient: LinearGradient(colors: [Color(0xFF7B2FBE), Color(0xFF4A148C)]),
+                              route: '/spyware_detector',
+                              subtitle: 'EMF bug & IR camera detector',
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
