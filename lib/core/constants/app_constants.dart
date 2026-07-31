@@ -16,6 +16,9 @@ class AppConstants {
   static const String masterSaltKey = 'master_salt';
   static const String encryptionKeyKey = 'enc_key';
   static const String vaultKeyKey = 'vault_key';
+  static const String duressPasswordHashKey = 'duress_pw_hash';
+  static const String duressSaltKey = 'duress_salt';
+  static const String duressEnabledKey = 'duress_enabled';
 
   // Security config
   static const int pbkdf2Iterations = 100000;

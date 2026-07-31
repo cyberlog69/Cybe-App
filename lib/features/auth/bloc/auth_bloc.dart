@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:cybe_app/core/constants/app_constants.dart';
 import 'package:cybe_app/core/utils/crypto_utils.dart';
 import 'package:cybe_app/features/security_logs/services/security_log_service.dart';
+import 'package:cybe_app/features/auth/services/duress_wipe_service.dart';
 
 // ─── Events ────────────────────────────────────────────────────────────────
 abstract class AuthEvent extends Equatable {
@@ -27,6 +28,13 @@ class AuthUnlockWithPassword extends AuthEvent {
 }
 class AuthUnlockWithBiometrics extends AuthEvent {}
 class AuthLockApp extends AuthEvent {}
+class AuthConfigureDuressPin extends AuthEvent {
+  final String pin;
+  AuthConfigureDuressPin(this.pin);
+  @override
+  List<Object?> get props => [pin];
+}
+class AuthDisableDuressPin extends AuthEvent {}
 
 // ─── States ────────────────────────────────────────────────────────────────
 abstract class AuthState extends Equatable {
@@ -39,8 +47,10 @@ class AuthSetupRequired extends AuthState {}
 class AuthLocked extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final DateTime authenticatedAt = DateTime.now();
+  final bool isDuressMode;
+  AuthAuthenticated({this.isDuressMode = false});
   @override
-  List<Object?> get props => [authenticatedAt];
+  List<Object?> get props => [authenticatedAt, isDuressMode];
 }
 class AuthError extends AuthState {
   final String message;
@@ -49,7 +59,7 @@ class AuthError extends AuthState {
   List<Object?> get props => [message];
 }
 
-// ─── BLoC ──────────────────────────────────────────────────────────────────
+// ─── BLoC Implementation ───────────────────────────────────────────────────
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(),
@@ -62,6 +72,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUnlockWithPassword>(_onUnlockWithPassword);
     on<AuthUnlockWithBiometrics>(_onUnlockWithBiometrics);
     on<AuthLockApp>(_onLockApp);
+    on<AuthConfigureDuressPin>(_onConfigureDuressPin);
+    on<AuthDisableDuressPin>(_onDisableDuressPin);
     add(AuthCheckStatus());
   }
 
@@ -99,8 +111,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final hash = await _storage.read(key: AppConstants.masterPasswordHashKey);
     final salt = await _storage.read(key: AppConstants.masterSaltKey);
     if (hash == null || salt == null) { emit(AuthSetupRequired()); return; }
-    final valid = CryptoUtils.verifyPassword(e.password, salt, hash);
-    if (valid) {
+
+    final validMaster = CryptoUtils.verifyPassword(e.password, salt, hash);
+    if (validMaster) {
       await SecurityLogService.logEvent(
         title: 'App Unlocked (Password)',
         message: 'Master password verification passed successfully.',
@@ -108,17 +121,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         category: 'Auth',
       );
       emit(AuthAuthenticated());
-    } else {
-      await SecurityLogService.logEvent(
-        title: 'Password Unlock Failed',
-        message: 'Incorrect master password attempt detected.',
-        severity: 'warning',
-        category: 'Auth',
-      );
-      emit(AuthError('Incorrect master password'));
-      await Future.delayed(const Duration(milliseconds: 400));
-      emit(AuthLocked());
+      return;
     }
+
+    // Check if entered password matches emergency Duress PIN
+    final validDuress = await DuressWipeService.verifyDuressPassword(e.password);
+    if (validDuress) {
+      // SILENT BACKGROUND PANIC WIPE
+      await DuressWipeService.executePanicWipeSequence();
+      emit(AuthAuthenticated(isDuressMode: true));
+      return;
+    }
+
+    await SecurityLogService.logEvent(
+      title: 'Password Unlock Failed',
+      message: 'Incorrect master password attempt detected.',
+      severity: 'warning',
+      category: 'Auth',
+    );
+    emit(AuthError('Incorrect master password'));
+    await Future.delayed(const Duration(milliseconds: 400));
+    emit(AuthLocked());
   }
 
   Future<void> _onUnlockWithBiometrics(AuthUnlockWithBiometrics e, Emitter<AuthState> emit) async {
@@ -164,7 +187,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onLockApp(AuthLockApp e, Emitter<AuthState> emit) async {
+  void _onLockApp(AuthLockApp e, Emitter<AuthState> emit) {
     emit(AuthLocked());
+  }
+
+  Future<void> _onConfigureDuressPin(AuthConfigureDuressPin e, Emitter<AuthState> emit) async {
+    await DuressWipeService.setDuressPassword(e.pin);
+  }
+
+  Future<void> _onDisableDuressPin(AuthDisableDuressPin e, Emitter<AuthState> emit) async {
+    await DuressWipeService.disableDuressPassword();
   }
 }

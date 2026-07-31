@@ -4,6 +4,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
 import '../bloc/settings_bloc.dart';
 import '../widgets/backup_dialogs.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/services/duress_wipe_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -155,12 +157,140 @@ class SettingsScreen extends StatelessWidget {
                       onTap: () => BackupDialogs.showImportDialog(context),
                     ),
                   ]),
+                  const SizedBox(height: 20),
+
+                  // Section 4: Anti-Coercion & Emergency Self-Destruct
+                  _sectionHeader('Anti-Coercion & Emergency Panic Wipe'),
+                  _buildCard([
+                    ListTile(
+                      leading: const Icon(Icons.no_encryption_gmailerrorred_rounded, color: AppTheme.warning),
+                      title: const Text('Emergency Duress PIN', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                      subtitle: const Text('Configure secondary PIN that triggers silent vault self-destruction if forced to unlock', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+                      onTap: () => _showDuressSetupDialog(context),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.delete_forever_rounded, color: AppTheme.danger),
+                      title: const Text('Instant Emergency Self-Destruct', style: TextStyle(color: AppTheme.danger, fontWeight: FontWeight.bold)),
+                      subtitle: const Text('Immediately wipe all vaults, keys, and encrypted files from disk', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      trailing: const Icon(Icons.warning_amber_rounded, color: AppTheme.danger),
+                      onTap: () => _showInstantPanicWipeConfirm(context),
+                    ),
+                  ]),
                   const SizedBox(height: 24),
                 ],
               );
             },
           ),
         ),
+      ),
+    );
+  }
+
+  void _showDuressSetupDialog(BuildContext context) {
+    final pinController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardColor,
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppTheme.warning),
+            SizedBox(width: 8),
+            Text('Configure Duress PIN', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'If forced to unlock Cybe Security under physical coercion or device seizure, entering this Duress PIN on the lock screen will seamlessly open a fake clean app while silently wiping all encrypted vaults and keys in the background.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: pinController,
+              obscureText: true,
+              style: const TextStyle(color: AppTheme.textPrimary, fontFamily: 'monospace'),
+              decoration: const InputDecoration(
+                hintText: 'Enter Emergency Duress PIN...',
+                prefixIcon: Icon(Icons.lock_reset_rounded),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final pin = pinController.text.trim();
+              if (pin.length < 4) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Duress PIN must be at least 4 digits.')),
+                );
+                return;
+              }
+              context.read<AuthBloc>().add(AuthConfigureDuressPin(pin));
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Duress Panic PIN successfully configured.'),
+                  backgroundColor: AppTheme.safe,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.warning, foregroundColor: Colors.black),
+            child: const Text('Save Duress PIN'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showInstantPanicWipeConfirm(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardColor,
+        title: const Row(
+          children: [
+            Icon(Icons.delete_forever_rounded, color: AppTheme.danger),
+            SizedBox(width: 8),
+            Text('SELF-DESTRUCT PANIC WIPE?', style: TextStyle(color: AppTheme.danger, fontWeight: FontWeight.bold, fontSize: 15)),
+          ],
+        ),
+        content: const Text(
+          'WARNING: This will permanently overwrite and delete all encrypted files, passwords, secret notes, 2FA tokens, and master cryptographic keys on disk.\n\nTHIS ACTION CANNOT BE UNDONE!',
+          style: TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await DuressWipeService.executePanicWipeSequence();
+              if (context.mounted) {
+                context.read<AuthBloc>().add(AuthLockApp());
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Panic wipe sequence executed. All vault keys & data purged.'),
+                    backgroundColor: AppTheme.danger,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.danger),
+            child: const Text('EXECUTE PANIC WIPE'),
+          ),
+        ],
       ),
     );
   }
