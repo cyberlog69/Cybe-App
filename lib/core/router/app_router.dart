@@ -24,6 +24,7 @@ import '../../features/ssh_keys/screens/ssh_keys_screen.dart';
 import '../../features/clipboard_manager/screens/clipboard_screen.dart';
 import '../../features/security_logs/screens/security_logs_screen.dart';
 import '../../features/app_audit/screens/app_audit_screen.dart';
+import '../../features/wifi_scanner/screens/mitm_shield_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -63,6 +64,7 @@ class AppRouter {
       GoRoute(path: '/clipboard', builder: (context, state) => const ClipboardScreen()),
       GoRoute(path: '/security_logs', builder: (context, state) => const SecurityLogsScreen()),
       GoRoute(path: '/app_audit', builder: (context, state) => const AppAuditScreen()),
+      GoRoute(path: '/mitm_shield', builder: (context, state) => const MitmShieldScreen()),
     ],
     redirect: (context, state) {
       final authState = context.read<AuthBloc>().state;

@@ -209,6 +209,13 @@ class DashboardScreen extends StatelessWidget {
                               route: '/app_audit',
                               subtitle: 'App permission & risk auditor',
                             ),
+                            ModuleCard(
+                              title: 'Wi-Fi Threat Shield',
+                              icon: Icons.shield_rounded,
+                              gradient: LinearGradient(colors: [Color(0xFF00E5FF), Color(0xFF00838F)]),
+                              route: '/mitm_shield',
+                              subtitle: 'MitM & ARP spoofing detector',
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
