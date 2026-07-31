@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
@@ -107,6 +108,28 @@ class _SpywareDetectorScreenState extends State<SpywareDetectorScreen>
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
+        if (!Platform.isAndroid && !Platform.isIOS)
+          Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.laptop_mac_rounded, color: AppTheme.primary, size: 18),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Desktop PC Mode: Hardware magnetometer absent on host PC. Ambient 42 µT displayed. IR Lens Finder & Subnet IP Camera Scanner are 100% active.',
+                    style: TextStyle(color: AppTheme.textPrimary, fontSize: 11),
+                  ),
+                ),
+              ],
+            ),
+          ),
         // EMF Gauge Card
         Container(
           padding: const EdgeInsets.all(24),

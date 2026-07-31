@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
@@ -203,33 +204,59 @@ class _AppAuditScreenState extends State<AppAuditScreen> {
   }
 
   Widget _buildSummaryHeader() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E1E30)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _summaryStat('Scanned Apps', '${_allApps.length}', AppTheme.primary, Icons.apps_rounded),
+    return Column(
+      children: [
+        if (!Platform.isAndroid)
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 16),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'OS Sandbox Active: Displaying cross-platform privacy profiles. Live app package manifest reading is active on Android.',
+                    style: TextStyle(color: AppTheme.textPrimary, fontSize: 11),
+                  ),
+                ),
+              ],
+            ),
           ),
-          Container(width: 1, height: 40, color: AppTheme.divider),
-          Expanded(
-            child: _summaryStat('High Risk', '$_highRiskCount', AppTheme.danger, Icons.warning_amber_rounded),
+        Container(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF1E1E30)),
           ),
-          Container(width: 1, height: 40, color: AppTheme.divider),
-          Expanded(
-            child: _summaryStat('Medium Risk', '$_mediumRiskCount', AppTheme.warning, Icons.info_outline_rounded),
+          child: Row(
+            children: [
+              Expanded(
+                child: _summaryStat('Scanned Apps', '${_allApps.length}', AppTheme.primary, Icons.apps_rounded),
+              ),
+              Container(width: 1, height: 40, color: AppTheme.divider),
+              Expanded(
+                child: _summaryStat('High Risk', '$_highRiskCount', AppTheme.danger, Icons.warning_amber_rounded),
+              ),
+              Container(width: 1, height: 40, color: AppTheme.divider),
+              Expanded(
+                child: _summaryStat('Medium Risk', '$_mediumRiskCount', AppTheme.warning, Icons.info_outline_rounded),
+              ),
+              Container(width: 1, height: 40, color: AppTheme.divider),
+              Expanded(
+                child: _summaryStat('Safe Apps', '$_safeCount', AppTheme.safe, Icons.check_circle_outline_rounded),
+              ),
+            ],
           ),
-          Container(width: 1, height: 40, color: AppTheme.divider),
-          Expanded(
-            child: _summaryStat('Safe Apps', '$_safeCount', AppTheme.safe, Icons.check_circle_outline_rounded),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

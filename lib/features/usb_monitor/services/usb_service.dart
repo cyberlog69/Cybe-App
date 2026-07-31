@@ -26,6 +26,8 @@ class UsbService {
   Future<List<UsbDeviceInfo>> scanDevices() async {
     if (Platform.isAndroid) return _scanAndroid();
     if (Platform.isWindows) return _scanWindows();
+    if (Platform.isMacOS) return _scanMacOS();
+    if (Platform.isLinux) return _scanLinux();
     return [];
   }
 
@@ -91,6 +93,59 @@ class UsbService {
           connectedAt: DateTime.now(),
         );
       }).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<List<UsbDeviceInfo>> _scanMacOS() async {
+    try {
+      final res = await Process.run('system_profiler', ['SPUSBDataType', '-json']);
+      if (res.exitCode != 0 || res.stdout.toString().isEmpty) return [];
+      final data = jsonDecode(res.stdout.toString());
+      final List<UsbDeviceInfo> devices = [];
+      if (data is Map && data.containsKey('SPUSBDataType')) {
+        final items = data['SPUSBDataType'] as List?;
+        if (items != null) {
+          for (final item in items) {
+            if (item is Map) {
+              final name = (item['_name'] ?? 'USB Peripheral').toString();
+              devices.add(UsbDeviceInfo(
+                vendorId: 'APPLE/USB',
+                productId: '0x1000',
+                productName: name,
+                connectedAt: DateTime.now(),
+              ));
+            }
+          }
+        }
+      }
+      return devices;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<List<UsbDeviceInfo>> _scanLinux() async {
+    try {
+      final res = await Process.run('lsusb', []);
+      if (res.exitCode != 0 || res.stdout.toString().isEmpty) return [];
+      final lines = res.stdout.toString().split('\n');
+      final List<UsbDeviceInfo> devices = [];
+      final reg = RegExp(r'ID\s+([0-9a-fA-F]{4}):([0-9a-fA-F]{4})\s+(.+)');
+
+      for (final line in lines) {
+        final match = reg.firstMatch(line);
+        if (match != null) {
+          devices.add(UsbDeviceInfo(
+            vendorId: match.group(1)!.toUpperCase(),
+            productId: match.group(2)!.toUpperCase(),
+            productName: match.group(3)!.trim(),
+            connectedAt: DateTime.now(),
+          ));
+        }
+      }
+      return devices;
     } catch (_) {
       return [];
     }

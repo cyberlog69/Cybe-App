@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
@@ -92,6 +93,28 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (!Platform.isAndroid && !Platform.isLinux)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.shield_outlined, color: AppTheme.primary, size: 18),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'OS Security Mode: Low-level ARP table sockets are scoped to Android/Linux. SSL Stripping, DNS Hijacking & Gateway Probes are 100% Active.',
+                          style: TextStyle(color: AppTheme.textPrimary, fontSize: 11),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               // Radar & Shield Header
               _buildShieldRadarHeader(report, statusColor),
               const SizedBox(height: 16),
