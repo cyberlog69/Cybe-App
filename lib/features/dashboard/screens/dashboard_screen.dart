@@ -223,6 +223,13 @@ class DashboardScreen extends StatelessWidget {
                               route: '/spyware_detector',
                               subtitle: 'EMF bug & IR camera detector',
                             ),
+                            ModuleCard(
+                              title: 'QR Code Inspector',
+                              icon: Icons.qr_code_scanner_rounded,
+                              gradient: LinearGradient(colors: [Color(0xFFFFB300), Color(0xFFE65100)]),
+                              route: '/qr_inspector',
+                              subtitle: 'Qishing & malicious link scanner',
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
