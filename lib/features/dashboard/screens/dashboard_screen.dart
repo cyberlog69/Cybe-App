@@ -230,6 +230,13 @@ class DashboardScreen extends StatelessWidget {
                               route: '/qr_inspector',
                               subtitle: 'Qishing & malicious link scanner',
                             ),
+                            ModuleCard(
+                              title: 'Threat Intel & CVEs',
+                              icon: Icons.newspaper_rounded,
+                              gradient: LinearGradient(colors: [Color(0xFFFF1744), Color(0xFF880E4F)]),
+                              route: '/threat_intel',
+                              subtitle: 'Zero-day advisories & CISA KEV',
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
