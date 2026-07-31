@@ -370,22 +370,53 @@ class _ThreatIntelScreenState extends State<ThreatIntelScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final uri = Uri.tryParse(cve.referenceUrl);
-                    if (uri != null) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
-                  },
+                  onPressed: () => _safeLaunchUrl(cve.canonicalNvdUrl),
                   icon: const Icon(Icons.open_in_browser_rounded, size: 18),
-                  label: const Text('Open Official NVD / CISA Advisory'),
+                  label: const Text('Open Official NVD Advisory'),
                 ),
               ),
+              if (cve.referenceUrl.isNotEmpty && cve.referenceUrl != cve.canonicalNvdUrl) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _safeLaunchUrl(cve.referenceUrl),
+                    icon: const Icon(Icons.link_rounded, size: 18),
+                    label: const Text('Open Vendor / CISA Article'),
+                  ),
+                ),
+              ],
               const SizedBox(height: 10),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _safeLaunchUrl(String rawUrl) async {
+    try {
+      final clean = rawUrl.trim();
+      final uri = Uri.tryParse(clean);
+      if (uri != null && await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else if (uri != null) {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open advisory URL.')),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Launch URL error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error launching link: $e')),
+        );
+      }
+    }
   }
 
   Widget _detailRow(String label, String value) {
