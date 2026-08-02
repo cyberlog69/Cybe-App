@@ -114,11 +114,31 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
       return;
     }
 
-    if (Platform.isLinux || Platform.isMacOS) {
-      setState(() {
-        _scanning = false;
-        _error = 'Wi-Fi radio scanning is active on Windows and Mobile. Check your Network Dashboard for active adapter details.';
-      });
+    if (Platform.isLinux) {
+      final linuxNetworks = await _scanLinuxWifi();
+      if (mounted) {
+        setState(() {
+          _networks = linuxNetworks;
+          _scanning = false;
+          if (linuxNetworks.isEmpty) {
+            _error = 'No Wi-Fi networks found. Ensure Wi-Fi adapter is enabled and nmcli / iwlist is installed.';
+          }
+        });
+      }
+      return;
+    }
+
+    if (Platform.isMacOS) {
+      final macosNetworks = await _scanMacosWifi();
+      if (mounted) {
+        setState(() {
+          _networks = macosNetworks;
+          _scanning = false;
+          if (macosNetworks.isEmpty) {
+            _error = 'No Wi-Fi networks found or airport utility unavailable.';
+          }
+        });
+      }
       return;
     }
 
@@ -146,6 +166,138 @@ class _WifiScannerScreenState extends State<WifiScannerScreen>
         setState(() { _error = 'Scan failed: $e'; _scanning = false; });
       }
     }
+  }
+
+  Future<List<_WifiNetwork>> _scanLinuxWifi() async {
+    try {
+      await Process.run('nmcli', ['device', 'wifi', 'rescan']);
+      final result = await Process.run('nmcli', [
+        '-t',
+        '-f',
+        'SSID,BSSID,SIGNAL,SECURITY',
+        'device',
+        'wifi',
+        'list'
+      ]);
+
+      if (result.exitCode == 0 && result.stdout.toString().trim().isNotEmpty) {
+        final lines = const LineSplitter().convert(result.stdout.toString());
+        final points = <_WifiNetwork>[];
+
+        for (final line in lines) {
+          if (line.trim().isEmpty) continue;
+          final unescaped = line.replaceAll(r'\:', '___COLON___');
+          final parts = unescaped.split(':');
+          if (parts.length >= 4) {
+            final ssid = parts[0].replaceAll('___COLON___', ':').trim();
+            final bssid = parts[1].replaceAll('___COLON___', ':').trim();
+            final signalStr = parts[2].trim();
+            final security = parts[3].replaceAll('___COLON___', ':').trim();
+
+            final pct = int.tryParse(signalStr) ?? 50;
+            final dbm = (pct / 2 - 100).round();
+
+            if (ssid.isNotEmpty || bssid.isNotEmpty) {
+              points.add(_WifiNetwork(
+                ssid: ssid.isEmpty ? '[Hidden Network]' : ssid,
+                bssid: bssid.isEmpty ? '00:00:00:00:00:00' : bssid,
+                capabilities: security.toUpperCase(),
+                level: dbm,
+              ));
+            }
+          }
+        }
+        if (points.isNotEmpty) return points;
+      }
+    } catch (e) {
+      debugPrint('Linux nmcli scan error: $e');
+    }
+
+    try {
+      final result = await Process.run('iwlist', ['scan']);
+      if (result.exitCode == 0 && result.stdout.toString().trim().isNotEmpty) {
+        final lines = const LineSplitter().convert(result.stdout.toString());
+        final points = <_WifiNetwork>[];
+        String currentSsid = '';
+        String currentBssid = '';
+        String currentEnc = '';
+        int currentSignal = -60;
+
+        for (final rawLine in lines) {
+          final line = rawLine.trim();
+          if (line.contains('Cell ') && line.contains('Address:')) {
+            if (currentSsid.isNotEmpty || currentBssid.isNotEmpty) {
+              points.add(_WifiNetwork(
+                ssid: currentSsid.isEmpty ? '[Hidden Network]' : currentSsid,
+                bssid: currentBssid,
+                capabilities: currentEnc.toUpperCase(),
+                level: currentSignal,
+              ));
+            }
+            final match = RegExp(r'Address:\s*([0-9A-Fa-f:]+)').firstMatch(line);
+            currentBssid = match?.group(1) ?? '';
+            currentSsid = '';
+            currentEnc = 'OPEN';
+          } else if (line.startsWith('ESSID:')) {
+            currentSsid = line.replaceAll('ESSID:', '').replaceAll('"', '').trim();
+          } else if (line.contains('Encryption key:on')) {
+            currentEnc = 'WPA2';
+          } else if (line.contains('Signal level=')) {
+            final match = RegExp(r'Signal level=(-\d+|\d+)').firstMatch(line);
+            if (match != null) {
+              currentSignal = int.tryParse(match.group(1)!) ?? -60;
+            }
+          }
+        }
+
+        if (currentSsid.isNotEmpty || currentBssid.isNotEmpty) {
+          points.add(_WifiNetwork(
+            ssid: currentSsid.isEmpty ? '[Hidden Network]' : currentSsid,
+            bssid: currentBssid,
+            capabilities: currentEnc.toUpperCase(),
+            level: currentSignal,
+          ));
+        }
+        if (points.isNotEmpty) return points;
+      }
+    } catch (_) {}
+
+    return [];
+  }
+
+  Future<List<_WifiNetwork>> _scanMacosWifi() async {
+    try {
+      const airportPath =
+          '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport';
+      final result = await Process.run(airportPath, ['-s']);
+      if (result.exitCode == 0 && result.stdout.toString().trim().isNotEmpty) {
+        final lines = const LineSplitter().convert(result.stdout.toString());
+        final points = <_WifiNetwork>[];
+
+        for (var i = 1; i < lines.length; i++) {
+          final line = lines[i].trim();
+          if (line.isEmpty) continue;
+          final parts = line.split(RegExp(r'\s+'));
+          if (parts.length >= 7) {
+            final ssid = parts[0];
+            final bssid = parts[1];
+            final rssi = int.tryParse(parts[2]) ?? -60;
+            final security = parts.sublist(6).join(' ');
+
+            points.add(_WifiNetwork(
+              ssid: ssid,
+              bssid: bssid,
+              capabilities: security.toUpperCase(),
+              level: rssi,
+            ));
+          }
+        }
+        return points;
+      }
+    } catch (e) {
+      debugPrint('macOS airport scan error: $e');
+    }
+    return [];
   }
 
   Future<List<_WifiNetwork>> _scanWindowsWifi() async {
