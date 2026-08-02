@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
@@ -85,7 +85,11 @@ class UsbBloc extends Bloc<UsbEvent, UsbState> {
     on<UsbHistoryCleared>(_onClear);
   }
 
-  static bool get _isSupported => Platform.isAndroid || Platform.isWindows;
+  static bool get _isSupported =>
+      Platform.isAndroid ||
+      Platform.isWindows ||
+      Platform.isLinux ||
+      Platform.isMacOS;
 
   Future<void> _onInit(UsbInitialize _, Emitter<UsbState> emit) async {
     emit(UsbLoading());

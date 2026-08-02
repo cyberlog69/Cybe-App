@@ -213,7 +213,7 @@ class _UsbMonitorView extends StatelessWidget {
                   textAlign: TextAlign.center),
               const SizedBox(height: 12),
               const Text(
-                'Real-time hardware USB monitoring is active on Windows and Android.\n\n'
+                'Real-time hardware USB monitoring is active on Windows, Linux, macOS, and Android.\n\n'
                 'On restricted platforms (such as iOS), use charge-only cables '
                 'and disable data transfer mode when connecting to public ports.',
                 style: TextStyle(color: AppTheme.textSecondary, height: 1.6),
