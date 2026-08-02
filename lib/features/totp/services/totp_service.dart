@@ -12,23 +12,31 @@ class TotpService {
     } else {
       _box = Hive.box(_boxName);
     }
-    await _seedDefault2faIfEmpty();
+    await _purgeLegacyDemoEntries();
   }
 
-  Future<void> _seedDefault2faIfEmpty() async {
-    if (_box!.isEmpty) {
-      final demo1 = TotpItem.create(
-        issuer: 'Google',
-        accountName: 'user@gmail.com',
-        secret: 'JBSWY3DPEHPK3PXP',
-      );
-      final demo2 = TotpItem.create(
-        issuer: 'GitHub',
-        accountName: 'cyberlog69',
-        secret: 'HXDMVJECJJWSRB3L',
-      );
-      await _box!.put(demo1.id, demo1.toMap());
-      await _box!.put(demo2.id, demo2.toMap());
+  /// Purges legacy hardcoded demo entries (e.g. cyberlog69 / demo keys)
+  Future<void> _purgeLegacyDemoEntries() async {
+    if (_box == null) return;
+    final keysToRemove = <dynamic>[];
+    for (final key in _box!.keys) {
+      final val = _box!.get(key);
+      if (val is Map) {
+        final acc = (val['accountName'] ?? '').toString();
+        final iss = (val['issuer'] ?? '').toString();
+        final sec = (val['secret'] ?? '').toString();
+        if (acc == 'cyberlog69' ||
+            acc == 'user@gmail.com' ||
+            iss == 'Google' ||
+            iss == 'GitHub' ||
+            sec == 'JBSWY3DPEHPK3PXP' ||
+            sec == 'HXDMVJECJJWSRB3L') {
+          keysToRemove.add(key);
+        }
+      }
+    }
+    for (final k in keysToRemove) {
+      await _box!.delete(k);
     }
   }
 
