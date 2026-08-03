@@ -48,14 +48,15 @@ class MeshMessage {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'from': senderAlias,
-    'ch': channel,
-    'data': encryptedData,
-    'ts': timestamp.millisecondsSinceEpoch,
-    'hops': hops,
-    'ttl': ttl,
-  };
+        'type': 'message',
+        'id': id,
+        'from': senderAlias,
+        'ch': channel,
+        'data': encryptedData,
+        'ts': timestamp.millisecondsSinceEpoch,
+        'hops': hops,
+        'ttl': ttl,
+      };
 
   factory MeshMessage.fromJson(Map<String, dynamic> json) => MeshMessage(
     id: json['id'] as String,

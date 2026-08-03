@@ -321,24 +321,29 @@ class LanMeshService implements MeshServiceInterface {
               final peerKey = '$remoteIp:$remotePort';
               assignedPeerKey = peerKey;
 
-              if (!_peers.containsKey(peerKey)) {
-                final peer = _LanPeer(
-                  id: peerKey,
-                  alias: remoteAlias,
-                  address: remoteIp,
-                  tcpPort: remotePort,
-                  socket: socket,
-                );
-                _peers[peerKey] = peer;
-                _peerList.removeWhere((p) => p.deviceId == peerKey);
-                _peerList.add(MeshPeerInfo(
-                  deviceId: peerKey,
-                  name: remoteAlias,
-                  rssi: 0,
-                ));
-                _peersController.add(List.from(_peerList));
-                debugPrint('[LanMesh] Connected peer registered: $remoteAlias ($peerKey)');
+              final existingPeer = _peers[peerKey];
+              if (existingPeer != null && existingPeer.socket != socket) {
+                try {
+                  existingPeer.socket.close();
+                } catch (_) {}
               }
+
+              final peer = _LanPeer(
+                id: peerKey,
+                alias: remoteAlias,
+                address: remoteIp,
+                tcpPort: remotePort,
+                socket: socket,
+              );
+              _peers[peerKey] = peer;
+              _peerList.removeWhere((p) => p.deviceId == peerKey);
+              _peerList.add(MeshPeerInfo(
+                deviceId: peerKey,
+                name: remoteAlias,
+                rssi: 0,
+              ));
+              _peersController.add(List.from(_peerList));
+              debugPrint('[LanMesh] Connected peer registered/updated: $remoteAlias ($peerKey)');
             } else {
               // Standard MeshMessage
               final msg = MeshMessage.fromJson(json);

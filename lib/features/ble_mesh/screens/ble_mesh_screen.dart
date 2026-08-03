@@ -319,6 +319,135 @@ class _BleMeshScreenState extends State<BleMeshScreen>
     );
   }
 
+  void _showPeersBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.hub_rounded, color: AppTheme.primary),
+                const SizedBox(width: 10),
+                Text(
+                  'Discovered Mesh Peers (${_peers.length})',
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 8),
+            if (_peers.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 30),
+                child: Center(
+                  child: Text(
+                    'No mesh peers discovered yet.\nEnsure other devices have BitMesh started on the same network.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppTheme.textSecondary, height: 1.5),
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _peers.length,
+                  itemBuilder: (context, index) {
+                    final peer = _peers[index];
+                    final isLan = peer.deviceId.contains(':');
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: AppTheme.primary.withValues(alpha: 0.3)),
+                      ),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.primary.withValues(alpha: 0.15),
+                          ),
+                          child: Icon(
+                            isLan
+                                ? Icons.wifi_tethering_rounded
+                                : Icons.bluetooth_rounded,
+                            color: AppTheme.primary,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          peer.name,
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'ID: ${peer.deviceId} • ${isLan ? "Wi-Fi LAN Mesh" : "BLE Mesh"}',
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.safe.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.circle, color: AppTheme.safe, size: 8),
+                              SizedBox(width: 4),
+                              Text(
+                                'Connected',
+                                style: TextStyle(
+                                  color: AppTheme.safe,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ─── Build ──────────────────────────────────────────────────────────────────
 
 
@@ -417,16 +546,38 @@ class _BleMeshScreenState extends State<BleMeshScreen>
                     ),
                   ),
                 ),
-                Text(
-                  _isRunning
-                      ? '${_peers.length} peer${_peers.length != 1 ? 's' : ''} nearby • $_alias'
-                      : 'Off-Grid Messenger • Tap ▶ to start',
-                  style: const TextStyle(
-                      color: AppTheme.textSecondary, fontSize: 11),
+                GestureDetector(
+                  onTap: _isRunning ? _showPeersBottomSheet : null,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _isRunning
+                            ? '${_peers.length} peer${_peers.length != 1 ? 's' : ''} nearby • $_alias'
+                            : 'Off-Grid Messenger • Tap ▶ to start',
+                        style: TextStyle(
+                          color: _isRunning ? AppTheme.primary : AppTheme.textSecondary,
+                          fontSize: 11,
+                          fontWeight: _isRunning ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      if (_isRunning) ...[
+                        const SizedBox(width: 4),
+                        const Icon(Icons.people_alt_outlined, size: 13, color: AppTheme.primary),
+                      ],
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
+          // Discovered Peers button
+          if (_isRunning)
+            IconButton(
+              icon: const Icon(Icons.hub_outlined, color: AppTheme.primary),
+              tooltip: 'Discovered Mesh Peers',
+              onPressed: _showPeersBottomSheet,
+            ),
           // Alias button
           IconButton(
             icon: const Icon(Icons.person_pin_rounded,
