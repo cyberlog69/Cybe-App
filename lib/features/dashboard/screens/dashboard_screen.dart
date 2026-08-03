@@ -4,13 +4,40 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
 import '../../auth/bloc/auth_bloc.dart';
+import '../../settings/services/update_checker_service.dart';
+import '../../settings/widgets/update_dialog.dart';
 
 import '../widgets/security_score_widget.dart';
 import '../widgets/module_card.dart';
 import '../widgets/status_bar_widget.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Silently check once per 24h; won't bother user if already checked today
+    Future.delayed(const Duration(seconds: 4), _silentUpdateCheck);
+  }
+
+  Future<void> _silentUpdateCheck() async {
+    if (!mounted) return;
+    try {
+      final result = await UpdateCheckerService.checkForUpdate(forceCheck: false);
+      if (!mounted) return;
+      if (result != null && result.updateAvailable) {
+        await UpdateDialog.show(context, result);
+      }
+    } catch (_) {
+      // Network errors during background check are silently ignored
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,14 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
 import '../bloc/settings_bloc.dart';
 import '../widgets/backup_dialogs.dart';
+import '../widgets/update_dialog.dart';
+import '../services/update_checker_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/services/duress_wipe_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _checkingUpdate = false;
+  String _currentVersion = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _currentVersion = info.version);
+  }
+
+  Future<void> _checkForUpdate() async {
+    if (_checkingUpdate) return;
+    setState(() => _checkingUpdate = true);
+    try {
+      final result = await UpdateCheckerService.checkForUpdate(forceCheck: true);
+      if (!mounted) return;
+      if (result == null) {
+        UpdateDialog.showError(context);
+      } else if (result.updateAvailable) {
+        await UpdateDialog.show(context, result);
+      } else {
+        UpdateDialog.showUpToDate(context, result.currentVersion);
+      }
+    } finally {
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +217,73 @@ class SettingsScreen extends StatelessWidget {
                       subtitle: const Text('Immediately wipe all vaults, keys, and encrypted files from disk', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                       trailing: const Icon(Icons.warning_amber_rounded, color: AppTheme.danger),
                       onTap: () => _showInstantPanicWipeConfirm(context),
+                    ),
+                  ]),
+                  const SizedBox(height: 20),
+
+                  // Section: App Updates
+                  _sectionHeader('App Updates'),
+                  _buildCard([
+                    ListTile(
+                      leading: Container(
+                        width: 36, height: 36,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF00E5FF), Color(0xFF7B2FBE)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.system_update_rounded,
+                            color: Colors.white, size: 20),
+                      ),
+                      title: const Text('Check for Updates',
+                          style: TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.bold)),
+                      subtitle: Text(
+                        _currentVersion.isEmpty
+                            ? 'Checks GitHub Releases for new version'
+                            : 'Current: v$_currentVersion  •  Checks GitHub Releases',
+                        style: const TextStyle(
+                            color: AppTheme.textSecondary, fontSize: 12),
+                      ),
+                      trailing: _checkingUpdate
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation(
+                                      AppTheme.primary)),
+                            )
+                          : const Icon(Icons.chevron_right_rounded,
+                              color: AppTheme.textSecondary),
+                      onTap: _checkingUpdate ? null : _checkForUpdate,
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.source_rounded,
+                          color: AppTheme.primary),
+                      title: const Text('Open Source',
+                          style: TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.bold)),
+                      subtitle: const Text(
+                          'MIT licensed · Source on GitHub · F-Droid compatible · No GMS/Firebase',
+                          style: TextStyle(
+                              color: AppTheme.textSecondary, fontSize: 12)),
+                      trailing: const Icon(Icons.open_in_new_rounded,
+                          size: 16, color: AppTheme.textSecondary),
+                      onTap: () async {
+                        final uri = Uri.parse(
+                            'https://github.com/cyberlog69/Cybe-App');
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri,
+                              mode: LaunchMode.externalApplication);
+                        }
+                      },
                     ),
                   ]),
                   const SizedBox(height: 24),
