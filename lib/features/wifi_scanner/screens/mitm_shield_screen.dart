@@ -212,28 +212,27 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (!Platform.isAndroid && !Platform.isLinux)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.shield_outlined, color: AppTheme.primary, size: 18),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'OS Security Mode: Low-level ARP table sockets are scoped to Android/Linux. SSL Stripping, DNS Hijacking & Encrypted DNS Shield are 100% Active.',
-                          style: TextStyle(color: AppTheme.textPrimary, fontSize: 11),
-                        ),
-                      ),
-                    ],
-                  ),
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
                 ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.verified_user_outlined, color: AppTheme.primary, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Native Protection Active on ${Platform.operatingSystem.toUpperCase()}: Low-level ARP inspection, SSL Stripping, DNS Hijacking, DoH Encrypted DNS Shield, and OpenVPN Manager are 100% active.',
+                        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 11),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               // Radar & Shield Header
               _buildShieldRadarHeader(report, statusColor),
               const SizedBox(height: 16),

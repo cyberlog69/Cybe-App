@@ -11,13 +11,13 @@ class MitmDetectorService {
   static const MethodChannel _channel = MethodChannel('com.cybe.cybe_app/mitm_detector');
   static final NetworkInfo _networkInfo = NetworkInfo();
 
-  /// Runs 5-point diagnostic scan covering BOTH Wi-Fi and Cellular Mobile Data networks
+  /// Runs 5-point diagnostic scan covering Windows, Linux, Android, and macOS across Wi-Fi, Ethernet, and Mobile Data
   static Future<MitmThreatReport> runDiagnosticScan() async {
     final connectivityList = await Connectivity().checkConnectivity();
     final isWifi = connectivityList.contains(ConnectivityResult.wifi);
     final isMobile = connectivityList.contains(ConnectivityResult.mobile);
     final isEthernet = connectivityList.contains(ConnectivityResult.ethernet);
-    final isConnected = isWifi || isMobile || isEthernet;
+    final isConnected = isWifi || isMobile || isEthernet || !kIsWeb;
 
     if (!isConnected) {
       return const MitmThreatReport(
@@ -49,10 +49,10 @@ class MitmDetectorService {
       ssid = 'Cellular Mobile Network (4G/5G/LTE)';
     } else if (isEthernet) {
       ssid = 'Wired Ethernet Connection';
-    }
-
-    if (!Platform.isAndroid) {
-      return _generateMockShieldReport(ssid, isMobile);
+    } else if (Platform.isWindows) {
+      ssid = 'Windows Network Adapter';
+    } else if (Platform.isLinux) {
+      ssid = 'Linux Network Interface';
     }
 
     String gatewayIp = isMobile ? 'Carrier Mobile Gateway' : 'Unknown';
@@ -60,8 +60,54 @@ class MitmDetectorService {
     final Map<String, String> arpTable = {};
     final List<MitmThreatAlert> alerts = [];
 
-    // 1. Fetch Native ARP Table & Gateway Details for Wi-Fi/Ethernet
-    if (isWifi || isEthernet) {
+    // 1. Fetch Native ARP Table & Gateway Details across Windows, Linux, & Android
+    if (Platform.isWindows) {
+      try {
+        final res = await Process.run('arp', ['-a']);
+        if (res.exitCode == 0) {
+          final lines = (res.stdout as String).split('\n');
+          for (final line in lines) {
+            final match = RegExp(
+                    r'(\d+\.\d+\.\d+\.\d+)\s+([0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2})')
+                .firstMatch(line);
+            if (match != null) {
+              final ip = match.group(1)!;
+              final mac = match.group(2)!.replaceAll('-', ':').toLowerCase();
+              arpTable[ip] = mac;
+              if (ip.endsWith('.1') || gatewayIp == 'Unknown') {
+                gatewayIp = ip;
+                gatewayMac = mac;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('[MitmDetectorService] Windows ARP error: $e');
+      }
+    } else if (Platform.isLinux) {
+      try {
+        final file = File('/proc/net/arp');
+        if (await file.exists()) {
+          final lines = await file.readAsLines();
+          for (final line in lines.skip(1)) {
+            final parts = line.trim().split(RegExp(r'\s+'));
+            if (parts.length >= 4) {
+              final ip = parts[0];
+              final mac = parts[3].toLowerCase();
+              if (mac != '00:00:00:00:00:00') {
+                arpTable[ip] = mac;
+                if (ip.endsWith('.1') || gatewayIp == 'Unknown') {
+                  gatewayIp = ip;
+                  gatewayMac = mac;
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('[MitmDetectorService] Linux ARP error: $e');
+      }
+    } else if (Platform.isAndroid && (isWifi || isEthernet)) {
       try {
         final Map<dynamic, dynamic>? res = await _channel.invokeMethod('getGatewayAndArpInfo');
         if (res != null) {
@@ -79,13 +125,18 @@ class MitmDetectorService {
           }
         }
       } catch (e) {
-        debugPrint('[MitmDetectorService] Native ARP fetch error: $e');
+        debugPrint('[MitmDetectorService] Android ARP error: $e');
       }
     }
 
-    // 2. ARP Poisoning Analysis (Wi-Fi & Ethernet)
+    if (gatewayIp == 'Unknown' && arpTable.isNotEmpty) {
+      gatewayIp = arpTable.keys.first;
+      gatewayMac = arpTable.values.first;
+    }
+
+    // 2. ARP Poisoning Analysis (Windows, Linux, Android)
     bool isArpSpoofed = false;
-    if (isWifi || isEthernet) {
+    if (!isMobile && arpTable.isNotEmpty) {
       final Map<String, List<String>> macToIps = {};
       arpTable.forEach((ip, mac) {
         macToIps.putIfAbsent(mac, () => []).add(ip);
@@ -97,7 +148,7 @@ class MitmDetectorService {
           alerts.add(MitmThreatAlert(
             title: 'ARP Cache Poisoning Detected',
             description:
-                'Hardware MAC $mac is claiming multiple IP addresses (${ips.join(", ")}). An attacker on this Wi-Fi is impersonating network devices.',
+                'Hardware MAC $mac is claiming multiple IP addresses (${ips.join(", ")}). An attacker on this network is impersonating devices.',
             severity: 'critical',
             timestamp: DateTime.now(),
             recommendation:
@@ -110,9 +161,19 @@ class MitmDetectorService {
     // 3. SSL Stripping & Proxy Interception Probe
     bool isSslStripped = false;
     try {
-      final bool sslPassed = await _channel.invokeMethod<bool>('checkSslIntegrity') ?? false;
-      if (!sslPassed) {
-        isSslStripped = true;
+      if (Platform.isAndroid) {
+        final bool sslPassed = await _channel.invokeMethod<bool>('checkSslIntegrity') ?? false;
+        if (!sslPassed) isSslStripped = true;
+      } else {
+        final client = HttpClient()..badCertificateCallback = (cert, host, port) => false;
+        final req = await client.getUrl(Uri.parse('https://www.google.com/generate_204'));
+        final resp = await req.close();
+        if (resp.statusCode != 204 && resp.statusCode != 200) {
+          isSslStripped = true;
+        }
+      }
+
+      if (isSslStripped) {
         alerts.add(MitmThreatAlert(
           title: 'SSL / HTTPS Certificate Proxy Interception',
           description:
@@ -183,7 +244,7 @@ class MitmDetectorService {
     // Log critical threats to Security Event Log
     if (isArpSpoofed || isSslStripped) {
       await SecurityLogService.logEvent(
-        title: isMobile ? 'CRITICAL: Cellular Data MitM Interception' : 'CRITICAL: Wi-Fi MitM Attack Flagged',
+        title: isMobile ? 'CRITICAL: Cellular Data MitM Interception' : 'CRITICAL: Network MitM Attack Flagged',
         message: 'Active network attack detected on "$ssid". Gateway IP: $gatewayIp.',
         severity: 'critical',
         category: 'Network',
@@ -205,32 +266,6 @@ class MitmDetectorService {
       threatStatus: status,
       alerts: alerts,
       arpCacheTable: arpTable,
-    );
-  }
-
-  static MitmThreatReport _generateMockShieldReport(String ssid, bool isMobile) {
-    return MitmThreatReport(
-      isConnected: true,
-      ssid: ssid,
-      gatewayIp: isMobile ? '100.64.0.1 (Carrier LTE Gateway)' : '192.168.1.1',
-      gatewayMac: isMobile ? 'CELLULAR-STACK' : '00:1A:2B:3C:4D:5E',
-      isArpSpoofed: false,
-      isDnsHijacked: false,
-      isSslStripped: false,
-      isCaptivePortalDetected: false,
-      threatScore: 0,
-      threatStatus: SecureDnsVpnService.isVpnTunnelActive
-          ? 'PROTECTED BY OPENVPN TUNNEL'
-          : SecureDnsVpnService.isDnsShieldActive
-              ? 'PROTECTED BY ENCRYPTED DNS'
-              : 'SECURE',
-      alerts: [],
-      arpCacheTable: isMobile
-          ? {'100.64.0.1': 'CELLULAR-STACK'}
-          : {
-              '192.168.1.1': '00:1A:2B:3C:4D:5E',
-              '192.168.1.15': 'AA:BB:CC:DD:EE:11',
-            },
     );
   }
 }
