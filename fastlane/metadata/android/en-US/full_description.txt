@@ -1,0 +1,49 @@
+Cybe is a high-performance, open-source, offline-first cyber-security suite built with Flutter. It runs natively on Android, iOS, Windows, macOS, and Linux — with zero reliance on Firebase, Google Play Services (GMS), or any proprietary cloud services.
+
+## 🔐 23-Module Security Suite
+
+**Password & Key Management**
+• AES-256 encrypted local password vault with category filters, health audit & master key protection.
+• Diceware passphrase generator (~500 EFF wordlist) & password generator with entropy calculator.
+• SSH key & API token vault with SHA-256 fingerprinting.
+
+**Authentication**
+• RFC 6238 TOTP 2FA code generator with 30-second countdown ring, tap-to-copy & QR camera import.
+• Biometric lock (fingerprint / face / PAM) & encrypted master password with PBKDF2 (100,000 iterations).
+• Anti-coercion Duress PIN: entering an emergency PIN triggers silent DOD 5220.22-M multi-pass vault wipe.
+
+**Network & Threat Detection**
+• Wi-Fi Threat Shield: real-time ARP spoofing detector, SSL stripping HTTPS TLS probe & DNS hijacking check.
+• Encrypted DNS Shield: Cloudflare (1.1.1.1), Google (8.8.8.8), OpenDNS (208.67.222.222) DNS-over-HTTPS (DoH) resolver.
+• BitMesh Off-Grid Messenger: BLE + LAN dual-transport P2P mesh chat with AES-256-GCM encryption.
+• LAN TCP port scanner: FTP, SSH, Telnet, HTTP, HTTPS, SMB, UPnP, RDP probing with latency benchmarking.
+
+**Device Security**
+• Vulnerability scanner: 13 deep device hardening checks (root/jailbreak, patch level, permissions, clipboard).
+• App permission risk auditor: weighted risk score 0–100 with threat badges for camera, mic, location, contacts.
+• USB security monitor: real-time USB device connection history, trust/block policies across Android, Windows, Linux, macOS.
+• Anti-Spyware Suite: magnetometer EMF bug detector, IR pinhole lens glint finder, LAN IP camera port scanner.
+
+**Privacy & Intelligence**
+• Dark web breach monitor: privacy-preserving k-Anonymity SHA-1 password breach check (HaveIBeenPwned API).
+• Malicious QR inspector: URL shortener unmasking (bit.ly), raw IP check, executable alert & Cyrillic homograph detector.
+• Phishing URL checker: URL heuristic analysis & brand typosquatting detector.
+• Cyber Threat Intel: live CISA Known Exploited Vulnerabilities (KEV) catalog API & NVD zero-day feed with CVSS v3.1 ratings.
+
+**Utilities**
+• AES-256-GCM encrypted file vault: background Isolate thread execution for large files.
+• AES-256 encrypted secret notes: recovery seeds, API keys & confidential notes with pinning.
+• Secure in-app clipboard manager: 10-item memory-only history with auto-wipe on lock/minimize.
+• Network dashboard: real-time Wi-Fi SSID, local IP, gateway monitoring, latency charts & DNS lookup.
+• Portable encrypted backup: export/restore entire vault as an encrypted .cybe archive.
+
+## 🔒 Privacy & No Tracking
+
+Cybe contains **no analytics, no telemetry, no crash reporting, and no advertising SDKs**. All data stays on your device, encrypted at rest. No account or internet connection is required for core functionality.
+
+## 📦 FOSS Build
+
+• Source code: https://github.com/cyberlog69/Cybe-App
+• License: MIT
+• Build tool: Flutter SDK (open-source, command-line buildable)
+• No Firebase, no GMS, no proprietary dependencies.

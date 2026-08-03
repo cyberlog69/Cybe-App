@@ -1,0 +1,10 @@
+### v1.0.0 — Cybe Security & Threat Intelligence Suite
+
+**New Features:**
+- Unified Vulnerability Scanner & Antivirus Malware Engine (4-layer detection: SHA-256 hashes, YARA-style heuristics, double-extension spoofing, ransomware extension guard)
+- Encrypted Quarantine Vault (.cybe_quarantine) to isolate, restore or destroy infected payloads
+- Encrypted DNS Shield: Cloudflare, Google, OpenDNS DNS-over-HTTPS (DoH) resolver with .ovpn profile importer
+- Cellular Mobile Data (4G/5G/LTE) network threat protection
+- BitMesh Off-Grid Messenger rewrite: < 500ms peer discovery via multi-target UDP broadcast & active subnet IP sweep; full-duplex TCP HELLO handshake; Discovered Peers interactive bottom sheet
+- Native Linux Wi-Fi scanner (nmcli/iwlist), USB monitor (lsusb) & PAM security status
+- 2FA Authenticator data isolation: per-device user store (no shared demo seeds)
