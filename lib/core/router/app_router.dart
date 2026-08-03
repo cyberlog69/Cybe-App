@@ -28,6 +28,7 @@ import '../../features/wifi_scanner/screens/mitm_shield_screen.dart';
 import '../../features/spyware_detector/screens/spyware_detector_screen.dart';
 import '../../features/qr_inspector/screens/qr_inspector_screen.dart';
 import '../../features/threat_intel/screens/threat_intel_screen.dart';
+import '../../features/antivirus/screens/antivirus_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -71,6 +72,7 @@ class AppRouter {
       GoRoute(path: '/spyware_detector', builder: (context, state) => const SpywareDetectorScreen()),
       GoRoute(path: '/qr_inspector', builder: (context, state) => const QrInspectorScreen()),
       GoRoute(path: '/threat_intel', builder: (context, state) => const ThreatIntelScreen()),
+      GoRoute(path: '/antivirus', builder: (context, state) => const AntivirusScreen()),
     ],
     redirect: (context, state) {
       final authState = context.read<AuthBloc>().state;

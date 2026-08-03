@@ -237,6 +237,13 @@ class DashboardScreen extends StatelessWidget {
                               route: '/threat_intel',
                               subtitle: 'Zero-day advisories & CISA KEV',
                             ),
+                            ModuleCard(
+                              title: 'Antivirus & Malware Shield',
+                              icon: Icons.bug_report_rounded,
+                              gradient: LinearGradient(colors: [Color(0xFF00E676), Color(0xFF00B0FF)]),
+                              route: '/antivirus',
+                              subtitle: 'Multi-engine malware & ransomware scanner',
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
