@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// The platform the app is currently running on, used to pick the right asset.
+enum AppPlatform { android, windows, linux, macos, ios, web }
 
 /// Result of a version check against GitHub Releases.
 class UpdateCheckResult {
@@ -12,6 +17,7 @@ class UpdateCheckResult {
   final String downloadUrl;
   final String releasePageUrl;
   final DateTime publishedAt;
+  final AppPlatform platform;
 
   const UpdateCheckResult({
     required this.updateAvailable,
@@ -21,15 +27,38 @@ class UpdateCheckResult {
     required this.downloadUrl,
     required this.releasePageUrl,
     required this.publishedAt,
+    required this.platform,
   });
+
+  /// Human-readable platform name for UI display.
+  String get platformLabel {
+    switch (platform) {
+      case AppPlatform.android:  return 'Android APK';
+      case AppPlatform.windows:  return 'Windows (.zip)';
+      case AppPlatform.linux:    return 'Linux (.tar.gz)';
+      case AppPlatform.macos:    return 'macOS (.dmg)';
+      case AppPlatform.ios:      return 'iOS (App Store)';
+      case AppPlatform.web:      return 'Web';
+    }
+  }
+
+  /// Icon for the platform download button.
+  String get platformEmoji {
+    switch (platform) {
+      case AppPlatform.android:  return '📱';
+      case AppPlatform.windows:  return '🪟';
+      case AppPlatform.linux:    return '🐧';
+      case AppPlatform.macos:    return '🍎';
+      case AppPlatform.ios:      return '📱';
+      case AppPlatform.web:      return '🌐';
+    }
+  }
 }
 
 /// Service that checks the GitHub Releases API for a newer version of the app.
-/// Fully FOSS-compatible — no GMS / Play Store dependency. Works on:
-///   • Sideloaded APK (GitHub Release download)
-///   • F-Droid (F-Droid manages its own update channel; this serves as a
-///     supplementary in-app notification for users who prefer manual check)
-///   • Windows & Linux (direct GitHub download link)
+/// Fully FOSS-compatible — no GMS / Play Store dependency.
+///
+/// Supported platforms: Android, Windows, Linux, macOS, iOS, Web
 class UpdateCheckerService {
   static const String _owner = 'cyberlog69';
   static const String _repo = 'Cybe-App';
@@ -40,6 +69,29 @@ class UpdateCheckerService {
 
   /// Shared preference key to track when we last checked (avoid hammering API).
   static const String _lastCheckKey = 'update_last_check_epoch';
+
+  /// Detect the current runtime platform.
+  static AppPlatform get currentPlatform {
+    if (kIsWeb) return AppPlatform.web;
+    if (Platform.isAndroid) return AppPlatform.android;
+    if (Platform.isWindows) return AppPlatform.windows;
+    if (Platform.isLinux)   return AppPlatform.linux;
+    if (Platform.isMacOS)   return AppPlatform.macos;
+    if (Platform.isIOS)     return AppPlatform.ios;
+    return AppPlatform.web;
+  }
+
+  /// File extension suffixes we look for per platform in the GitHub Release assets.
+  static List<String> _assetSuffixesForPlatform(AppPlatform platform) {
+    switch (platform) {
+      case AppPlatform.android: return ['.apk'];
+      case AppPlatform.windows: return ['-windows.zip', 'windows.zip', '.zip', '.exe'];
+      case AppPlatform.linux:   return ['-linux.tar.gz', 'linux.tar.gz', '.tar.gz', '-linux.zip', 'linux.zip'];
+      case AppPlatform.macos:   return ['-macos.dmg', 'macos.dmg', '.dmg', '-mac.dmg'];
+      case AppPlatform.ios:     return [];  // iOS updates via App Store
+      case AppPlatform.web:     return [];
+    }
+  }
 
   /// Check if a newer version is available on GitHub.
   /// [forceCheck] skips the 24-hour cooldown used for background auto-checks.
@@ -70,18 +122,27 @@ class UpdateCheckerService {
 
       // Get current app version from pubspec via package_info_plus
       final info = await PackageInfo.fromPlatform();
-      final String currentVersion = info.version; // e.g. "1.0.0"
+      final String currentVersion = info.version;
 
       final bool isNewer = _isVersionNewer(tagName, currentVersion);
 
-      // Find direct APK asset URL if available
-      String downloadUrl = _releasesPageUrl;
-      final assets = json['assets'] as List<dynamic>? ?? [];
-      for (final asset in assets) {
-        final name = (asset['name'] as String? ?? '').toLowerCase();
-        if (name.endsWith('.apk')) {
-          downloadUrl = asset['browser_download_url'] as String? ?? _releasesPageUrl;
-          break;
+      // Detect runtime platform and find the matching asset
+      final platform = currentPlatform;
+      final suffixes = _assetSuffixesForPlatform(platform);
+      String downloadUrl = _releasesPageUrl; // fallback to releases page
+
+      if (suffixes.isNotEmpty) {
+        final assets = json['assets'] as List<dynamic>? ?? [];
+        // Try each preferred suffix in priority order
+        outer:
+        for (final suffix in suffixes) {
+          for (final asset in assets) {
+            final name = (asset['name'] as String? ?? '').toLowerCase();
+            if (name.endsWith(suffix)) {
+              downloadUrl = asset['browser_download_url'] as String? ?? _releasesPageUrl;
+              break outer;
+            }
+          }
         }
       }
 
@@ -96,6 +157,7 @@ class UpdateCheckerService {
         downloadUrl: downloadUrl,
         releasePageUrl: _releasesPageUrl,
         publishedAt: DateTime.tryParse(publishedStr) ?? DateTime.now(),
+        platform: platform,
       );
     } catch (_) {
       return null; // Network error — fail silently
@@ -108,7 +170,6 @@ class UpdateCheckerService {
     try {
       final l = latest.split('.').map(int.parse).toList();
       final c = current.split('.').map(int.parse).toList();
-      // Pad to equal length
       while (l.length < 3) { l.add(0); }
       while (c.length < 3) { c.add(0); }
       for (int i = 0; i < 3; i++) {

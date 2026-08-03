@@ -141,14 +141,17 @@ class _UpdateSheet extends StatelessWidget {
                 controller: scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 children: [
-                  // Release date chip
-                  Row(
+                  // Release chips: date, version, platform
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
                     children: [
                       _chip(Icons.calendar_today_outlined,
                           _formatDate(result.publishedAt), AppTheme.primary),
-                      const SizedBox(width: 8),
                       _chip(Icons.new_releases_outlined,
                           'v${result.latestVersion}', AppTheme.secondary),
+                      _chip(Icons.devices_rounded,
+                          result.platformLabel, const Color(0xFF7B2FBE)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -197,17 +200,19 @@ class _UpdateSheet extends StatelessWidget {
                         ),
                         child: Container(
                           alignment: Alignment.center,
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.download_rounded,
+                              const Icon(Icons.download_rounded,
                                   color: Colors.white, size: 20),
-                              SizedBox(width: 10),
-                              Text('Download Update',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 10),
+                              Text(
+                                '${result.platformEmoji}  Download for ${result.platformLabel}',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ],
                           ),
                         ),
