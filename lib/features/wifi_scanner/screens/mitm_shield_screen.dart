@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/cybe_widgets.dart';
 import '../models/mitm_threat_report.dart';
 import '../services/mitm_detector_service.dart';
+import '../services/secure_dns_vpn_service.dart';
 
 class MitmShieldScreen extends StatefulWidget {
   const MitmShieldScreen({super.key});
@@ -18,6 +19,10 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
   MitmThreatReport? _report;
   bool _isScanning = true;
   bool _autoShieldActive = false;
+  bool _isDnsShieldActive = SecureDnsVpnService.isDnsShieldActive;
+  bool _isVpnTunnelActive = SecureDnsVpnService.isVpnTunnelActive;
+  DnsProvider _selectedDnsProvider = SecureDnsVpnService.selectedProvider;
+  List<VpnProfile> _vpnProfiles = [];
   Timer? _autoShieldTimer;
   late AnimationController _radarController;
 
@@ -28,6 +33,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat();
+    _loadVpnProfiles();
     _runScan();
   }
 
@@ -36,6 +42,11 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
     _autoShieldTimer?.cancel();
     _radarController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadVpnProfiles() async {
+    final profiles = await SecureDnsVpnService.loadSavedVpnProfiles();
+    if (mounted) setState(() => _vpnProfiles = profiles);
   }
 
   Future<void> _runScan() async {
@@ -58,11 +69,119 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Real-Time Wi-Fi Threat Shield auto-monitoring enabled.'),
+          content: Text('Real-Time Network Threat Shield auto-monitoring enabled.'),
           backgroundColor: AppTheme.safe,
         ),
       );
     }
+  }
+
+  Future<void> _toggleDnsShield(bool value) async {
+    await SecureDnsVpnService.toggleDnsShield(value, provider: _selectedDnsProvider);
+    if (mounted) {
+      setState(() => _isDnsShieldActive = value);
+      _runScan();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            value
+                ? 'Encrypted DNS Shield active via ${_selectedDnsProvider.displayName}.'
+                : 'Encrypted DNS Shield disabled.',
+          ),
+          backgroundColor: value ? AppTheme.safe : AppTheme.warning,
+        ),
+      );
+    }
+  }
+
+  Future<void> _toggleVpnTunnel(bool value) async {
+    if (value && _vpnProfiles.isEmpty) {
+      _showImportVpnDialog();
+      return;
+    }
+
+    await SecureDnsVpnService.toggleVpnTunnel(value);
+    if (mounted) {
+      setState(() => _isVpnTunnelActive = value);
+      _runScan();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            value
+                ? 'OpenVPN Secure Tunnel connected. All network traffic encrypted.'
+                : 'OpenVPN Tunnel disconnected.',
+          ),
+          backgroundColor: value ? AppTheme.safe : AppTheme.warning,
+        ),
+      );
+    }
+  }
+
+  Future<void> _importOvpnProfile() async {
+    try {
+      final profile = await SecureDnsVpnService.importOvpnProfile();
+      if (profile != null) {
+        await _loadVpnProfiles();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Imported OpenVPN profile "${profile.name}".'),
+            backgroundColor: AppTheme.safe,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Import error: $e'),
+            backgroundColor: AppTheme.danger,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showImportVpnDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.vpn_lock_rounded, color: AppTheme.primary),
+            SizedBox(width: 10),
+            Text('OpenVPN Tunnel Manager',
+                style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'No OpenVPN (.ovpn) configuration profile found.\n\nImport a custom .ovpn file from your VPN provider to establish an encrypted tunnel over Wi-Fi and Cellular Mobile Data.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13, height: 1.4),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _importOvpnProfile();
+            },
+            icon: const Icon(Icons.file_upload_outlined, size: 18),
+            label: const Text('Import .ovpn File'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -76,7 +195,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wi-Fi MitM & ARP Threat Shield'),
+        title: const Text('Wi-Fi & Cellular Threat Shield'),
         backgroundColor: AppTheme.background,
         actions: [
           IconButton(
@@ -108,7 +227,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'OS Security Mode: Low-level ARP table sockets are scoped to Android/Linux. SSL Stripping, DNS Hijacking & Gateway Probes are 100% Active.',
+                          'OS Security Mode: Low-level ARP table sockets are scoped to Android/Linux. SSL Stripping, DNS Hijacking & Encrypted DNS Shield are 100% Active.',
                           style: TextStyle(color: AppTheme.textPrimary, fontSize: 11),
                         ),
                       ),
@@ -123,9 +242,13 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
               _buildAutoShieldToggleCard(),
               const SizedBox(height: 16),
 
+              // Encrypted DNS & OpenVPN Shield Card
+              _buildDnsVpnShieldCard(),
+              const SizedBox(height: 16),
+
               // Diagnostic Probe Checks Header
               const Text(
-                'Wi-Fi Security Diagnostic Probes',
+                'Wi-Fi & Mobile Network Diagnostic Probes',
                 style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontWeight: FontWeight.bold,
@@ -163,14 +286,14 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
                   title: 'DNS Resolution Sanity Check',
                   subtitle: report.isDnsHijacked
                       ? 'WARNING: Canonical DNS lookup failed or redirected.'
-                      : 'DNS response verified against trusted endpoints.',
+                      : 'DNS response verified against trusted endpoints (${_selectedDnsProvider.displayName}).',
                   isPassed: !report.isDnsHijacked,
                   icon: Icons.dns_outlined,
                 ),
                 const SizedBox(height: 10),
                 _buildProbeCard(
                   title: 'Active Network Gateway Inspection',
-                  subtitle: 'Gateway IP: ${report.gatewayIp} | SSID: ${report.ssid}',
+                  subtitle: 'Gateway IP: ${report.gatewayIp} | Network: ${report.ssid}',
                   isPassed: report.isConnected,
                   icon: Icons.wifi_protected_setup_rounded,
                 ),
@@ -197,7 +320,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
                       child: OutlinedButton.icon(
                         onPressed: () => _showArpTableDialog(report),
                         icon: const Icon(Icons.table_rows_outlined, size: 18),
-                        label: const Text('View ARP Cache Table'),
+                        label: const Text('View Network Table'),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -264,7 +387,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
           ),
           const SizedBox(height: 4),
           Text(
-            'SSID: ${report?.ssid ?? 'Unknown'} • Gateway: ${report?.gatewayIp ?? 'Checking...'}',
+            'Network: ${report?.ssid ?? 'Unknown'} • Gateway: ${report?.gatewayIp ?? 'Checking...'}',
             style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
           ),
           const SizedBox(height: 12),
@@ -277,7 +400,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Gateway MAC: ',
+                const Text('Gateway MAC / Stack: ',
                     style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
                 Text(
                   report?.gatewayMac ?? 'N/A',
@@ -323,7 +446,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
                         fontSize: 13)),
-                Text('Continuous background ARP & SSL probing every 10s',
+                Text('Continuous background ARP, SSL & Mobile probe every 10s',
                     style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
               ],
             ),
@@ -333,6 +456,158 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
             onChanged: _toggleAutoShield,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDnsVpnShieldCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: (_isDnsShieldActive || _isVpnTunnelActive)
+              ? AppTheme.safe.withValues(alpha: 0.4)
+              : const Color(0xFF1E1E30),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.vpn_lock_rounded, color: AppTheme.primary, size: 22),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Encrypted DNS & OpenVPN Shield',
+                        style: TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15)),
+                    Text('Prevents Wi-Fi & Cellular DNS poisoning & eavesdropping',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Provider Choice Chips
+          const Text('Select Secure DNS Resolver:',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              _dnsChoiceChip(DnsProvider.cloudflare),
+              _dnsChoiceChip(DnsProvider.google),
+              _dnsChoiceChip(DnsProvider.openDns),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Encrypted DNS Shield Switch
+          Row(
+            children: [
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('DoH Encrypted DNS Shield',
+                        style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('Routes all domain requests over encrypted HTTPS sockets',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _isDnsShieldActive,
+                onChanged: _toggleDnsShield,
+              ),
+            ],
+          ),
+          const Divider(height: 24),
+
+          // OpenVPN Tunnel Toggle & Importer
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _vpnProfiles.isNotEmpty
+                          ? 'OpenVPN Profile: ${_vpnProfiles.first.name}'
+                          : 'OpenVPN Secure Tunnel',
+                      style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                    Text(
+                      _vpnProfiles.isNotEmpty
+                          ? '${_vpnProfiles.first.remoteHost}:${_vpnProfiles.first.remotePort} (${_vpnProfiles.first.proto})'
+                          : 'Import custom .ovpn file for full tunnel encryption',
+                      style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _isVpnTunnelActive,
+                onChanged: _toggleVpnTunnel,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Import .ovpn Button
+          OutlinedButton.icon(
+            onPressed: _importOvpnProfile,
+            icon: const Icon(Icons.file_upload_outlined, size: 16),
+            label: Text(_vpnProfiles.isEmpty ? 'Import .ovpn Profile' : 'Import New .ovpn Profile'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dnsChoiceChip(DnsProvider provider) {
+    final isSelected = _selectedDnsProvider == provider;
+    return ChoiceChip(
+      label: Text(provider.displayName),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() => _selectedDnsProvider = provider);
+          SecureDnsVpnService.setDnsProvider(provider);
+          if (_isDnsShieldActive) {
+            _toggleDnsShield(true);
+          }
+        }
+      },
+      selectedColor: AppTheme.primary.withValues(alpha: 0.25),
+      backgroundColor: AppTheme.surfaceVariant,
+      labelStyle: TextStyle(
+        color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 11,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: isSelected ? AppTheme.primary : Colors.transparent,
+        ),
       ),
     );
   }
@@ -350,7 +625,7 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: const Color(0xFF1E1E30)),
       ),
       child: Row(
         children: [
@@ -374,12 +649,12 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
                         fontSize: 13)),
                 const SizedBox(height: 2),
                 Text(subtitle,
-                    style: TextStyle(color: isPassed ? AppTheme.textSecondary : color, fontSize: 11)),
+                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
               ],
             ),
           ),
           Icon(
-            isPassed ? Icons.check_circle_rounded : Icons.error_rounded,
+            isPassed ? Icons.check_circle_rounded : Icons.cancel_rounded,
             color: color,
             size: 20,
           ),
@@ -395,151 +670,100 @@ class _MitmShieldScreenState extends State<MitmShieldScreen>
       decoration: BoxDecoration(
         color: AppTheme.danger.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.danger.withValues(alpha: 0.4)),
+        border: Border.all(color: AppTheme.danger.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppTheme.danger, size: 18),
+              const Icon(Icons.warning_amber_rounded, color: AppTheme.danger, size: 20),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  alert.title,
+              Text(alert.title,
                   style: const TextStyle(
                       color: AppTheme.danger,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14),
-                ),
-              ),
+                      fontSize: 14)),
             ],
           ),
           const SizedBox(height: 6),
           Text(alert.description,
               style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12)),
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.lightbulb_outline_rounded, color: AppTheme.warning, size: 16),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    alert.recommendation,
-                    style: const TextStyle(color: AppTheme.warning, fontSize: 11),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Text('Recommendation: ${alert.recommendation}',
+              style: const TextStyle(
+                  color: AppTheme.warning,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11)),
         ],
       ),
     );
   }
 
   void _showArpTableDialog(MitmThreatReport report) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: AppTheme.cardColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
           children: [
-            Row(
-              children: [
-                const Text('Local ARP Cache Table (/proc/net/arp)',
-                    style: TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15)),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close, color: AppTheme.textSecondary),
-                  onPressed: () => Navigator.pop(ctx),
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 10),
-            if (report.arpCacheTable.isEmpty)
-              const Center(
-                child: Text('No active ARP entries found.',
-                    style: TextStyle(color: AppTheme.textSecondary)),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: report.arpCacheTable.length,
-                  itemBuilder: (c, i) {
-                    final ip = report.arpCacheTable.keys.elementAt(i);
-                    final mac = report.arpCacheTable[ip]!;
-                    final isGateway = ip == report.gatewayIp;
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isGateway
-                            ? AppTheme.primary.withValues(alpha: 0.15)
-                            : AppTheme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                            color: isGateway ? AppTheme.primary : Colors.transparent),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isGateway ? Icons.router_rounded : Icons.devices_rounded,
-                            size: 16,
-                            color: isGateway ? AppTheme.primary : AppTheme.textSecondary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(ip,
-                              style: TextStyle(
-                                  color: isGateway ? AppTheme.primary : AppTheme.textPrimary,
-                                  fontWeight: isGateway ? FontWeight.bold : FontWeight.normal,
-                                  fontSize: 12)),
-                          if (isGateway) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text('GATEWAY',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                          const Spacer(),
-                          Text(mac,
-                              style: const TextStyle(
-                                  color: AppTheme.secondary,
-                                  fontFamily: 'monospace',
-                                  fontSize: 11)),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
+            Icon(Icons.table_rows_outlined, color: AppTheme.primary),
+            SizedBox(width: 10),
+            Text('Network Device Table',
+                style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
           ],
         ),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Gateway IP: ${report.gatewayIp} | MAC: ${report.gatewayMac}',
+                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+              ),
+              const Divider(height: 20),
+              if (report.arpCacheTable.isEmpty)
+                const Text('No network device table entries available.',
+                    style: TextStyle(color: AppTheme.textSecondary))
+              else
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: report.arpCacheTable.entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Text(entry.key,
+                                style: const TextStyle(
+                                    color: AppTheme.textPrimary,
+                                    fontFamily: 'monospace',
+                                    fontSize: 12)),
+                            const Spacer(),
+                            Text(entry.value,
+                                style: const TextStyle(
+                                    color: AppTheme.primary,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12)),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
