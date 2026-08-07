@@ -40,6 +40,12 @@ subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            freeCompilerArgs.addAll(
+                listOf(
+                    "-nowarn",
+                    "-Xsuppress-version-warnings"
+                )
+            )
         }
     }
 }
