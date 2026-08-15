@@ -7,9 +7,7 @@
 [![FOSS](https://img.shields.io/badge/FOSS-No%20Firebase%20%7C%20No%20GMS-brightgreen?style=for-the-badge)](FOSS_COMPLIANCE.md)
 [![F-Droid Ready](https://img.shields.io/badge/F--Droid-Ready-blue?style=for-the-badge&logo=fdroid)](fastlane/metadata/android/en-US/full_description.txt)
 
-A high-performance, open-source, offline-first mobile cyber-security suite built with **Flutter for Android**, accompanied by a standalone **Windows & Linux BitMesh Relay & GitHub Sync Daemon**.
-
-Cybe provides: encrypted password & key management, RFC 6238 2FA TOTP token generation, dark web breach monitoring, off-grid peer-to-peer mesh messaging (**BitMesh**), real-time Man-in-the-Middle & ARP spoofing threat detection, encrypted DNS-over-HTTPS shield, cellular mobile network protection, antivirus & malware engine, hidden camera & bug detection, malicious QR inspection, anti-coercion self-destruct panic wiping, live CISA/NVD cyber threat intelligence, app permission risk auditing, system security log streams, in-app GitHub update checker, and modern Material UI branding.
+**Cybe** — An advanced, offline-first mobile cyber-security & privacy suite built natively for **Android**, accompanied by a **Windows & Linux BitMesh Relay & GitHub Sync Daemon**. Features Material 3 Cyber UI, AES-256 File & Password Vault, RFC 6238 2FA Authenticator, Wi-Fi Threat Shield, Cellular Network Protection, 4-Layer Antivirus & Malware Scanner, Off-Grid BitMesh P2P Messaging, Phishing URL Checker, Device Vulnerability Auditor, Anti-Spyware Bug Finder, USB Security Monitor, and Live Cyber Threat Intelligence.
 
 > **Privacy First**: No analytics, no telemetry, no Firebase, no Google Play Services (GMS), no advertising SDKs. All data stays on your device, encrypted at rest.
 
@@ -17,10 +15,10 @@ Cybe provides: encrypted password & key management, RFC 6238 2FA TOTP token gene
 
 ## 📖 About the Project
 
-**Cybe** is engineered from the ground up as an all-in-one, sovereign mobile defense ecosystem. It pairs a native Android security application with an off-grid desktop relay daemon for full device protection, local encrypted storage, and ad-hoc communication without cellular or internet infrastructure.
+**Cybe** is engineered from the ground up as an all-in-one, sovereign mobile defense ecosystem. It pairs a native Android security application with an off-grid desktop relay daemon for comprehensive device protection, local encrypted storage, and ad-hoc communication without cellular or internet infrastructure.
 
-- **Primary Android App**: Target Android 16 (API 36) / Android 7.0+ (API 24+), zero GMS dependencies, fully compatible with de-Googled ROMs (GrapheneOS, CalyxOS, LineageOS).
-- **BitMesh Relay Node**: Cross-platform background service running on Windows & Linux PCs to route mesh messages, audit local directories, and automate GitHub APK update distribution.
+- **📱 Android Mobile Security App**: Targets Android 16 (API 36) / Android 7.0+ (API 24+), zero GMS dependencies, 100% offline-first, and fully compatible with de-Googled ROMs (GrapheneOS, CalyxOS, LineageOS).
+- **🛰️ Windows & Linux BitMesh Relay Daemon**: Standalone background service running on desktop/server hardware to bridge mobile mesh peers over LAN, audit local folder integrity, and distribute automatic GitHub APK updates.
 
 ---
 
