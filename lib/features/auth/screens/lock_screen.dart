@@ -68,48 +68,11 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                     animation: Listenable.merge([_pulseAnim, _glowAnim]),
                     builder: (_, __) => ScaleTransition(
                       scale: _pulseAnim,
-                      child: Container(
-                        width: 110,
-                        height: 110,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [AppTheme.primary, AppTheme.accent],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primary.withValues(alpha: _glowAnim.value),
-                              blurRadius: 40,
-                              spreadRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(Icons.security, size: 56, color: Colors.white),
+                      child: const CybeLogo.hero(
+                        size: 110,
+                        title: 'CYBE',
+                        subtitle: 'SECURITY SUITE',
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  ShaderMask(
-                    shaderCallback: (b) => AppTheme.primaryGradient.createShader(b),
-                    child: const Text(
-                      'CYBE',
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 12,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'SECURITY SUITE',
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12,
-                      letterSpacing: 6,
                     ),
                   ),
                   const Spacer(flex: 2),

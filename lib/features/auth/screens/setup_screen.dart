@@ -62,20 +62,12 @@ class _SetupScreenState extends State<SetupScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 100, height: 100,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: AppTheme.primaryGradient,
-            ),
-            child: const Icon(Icons.shield_outlined, size: 52, color: Colors.white),
-          ),
-          const SizedBox(height: 32),
           const Text('Welcome to', style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
-          const SizedBox(height: 8),
-          ShaderMask(
-            shaderCallback: (b) => AppTheme.primaryGradient.createShader(b),
-            child: const Text('CYBE', style: TextStyle(fontSize: 52, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 10)),
+          const SizedBox(height: 16),
+          const CybeLogo.hero(
+            size: 100,
+            title: 'CYBE',
+            subtitle: 'SECURITY SUITE',
           ),
           const SizedBox(height: 16),
           const Text(

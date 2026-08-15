@@ -24,10 +24,8 @@ class _FileVaultView extends StatelessWidget {
   const _FileVaultView();
 
   Future<void> _pickAndImport(BuildContext context) async {
-    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    if (file.path == null) return;
+    final file = await FilePicker.pickFile();
+    if (file == null || file.path == null) return;
     if (!context.mounted) return;
     context.read<FileVaultBloc>().add(
           FileVaultImport(filePath: file.path!, fileName: file.name));

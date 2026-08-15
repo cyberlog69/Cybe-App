@@ -111,7 +111,7 @@ class _SecurityLogsScreenState extends State<SecurityLogsScreen> {
 
   Future<void> _exportLogs() async {
     final text = await SecurityLogService.exportLogsFormatted();
-    await Share.share(text, subject: 'Cybe Security System Event Logs');
+    await SharePlus.instance.share(ShareParams(text: text, subject: 'Cybe Security System Event Logs'));
   }
 
   List<SecurityEventLog> get _filteredLogs {

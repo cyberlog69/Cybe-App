@@ -58,24 +58,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   automaticallyImplyLeading: false,
-                  title: Row(
-                    children: [
-                      Container(
-                        width: 34, height: 34,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: AppTheme.primaryGradient,
-                        ),
-                        child: const Icon(Icons.security, size: 18, color: Colors.white),
-                      ),
-                      const SizedBox(width: 10),
-                      ShaderMask(
-                        shaderCallback: (b) => AppTheme.primaryGradient.createShader(b),
-                        child: const Text('CYBE',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 5, color: Colors.white)),
-                      ),
-                    ],
-                  ),
+                  title: const CybeLogo.appBar(),
+
                   actions: [
                     IconButton(
                       tooltip: 'Settings',
@@ -292,25 +276,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              width: 36, height: 36,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: AppTheme.primaryGradient,
-              ),
-              child: const Icon(Icons.shield, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 12),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Cybe Security', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
-                Text('v1.0.0 (Build 1)', style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
-              ],
-            ),
-          ],
+        title: const CybeLogo(
+          size: 38,
+          title: 'Cybe Security',
+          subtitle: 'v1.0.0 (Build 1)',
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,

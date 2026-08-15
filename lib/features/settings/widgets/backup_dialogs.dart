@@ -46,7 +46,7 @@ class BackupDialogs {
                       try {
                         final path = await BackupService.exportBackup(pwCtrl.text);
                         if (dialogCtx.mounted) Navigator.pop(dialogCtx);
-                        await Share.shareXFiles([XFile(path)], text: 'Cybe Vault Encrypted Backup (.cybe)');
+                        await SharePlus.instance.share(ShareParams(files: [XFile(path)], text: 'Cybe Vault Encrypted Backup (.cybe)'));
                       } catch (e) {
                         setDialogState(() => loading = false);
                         if (context.mounted) {
@@ -85,9 +85,9 @@ class BackupDialogs {
             children: [
               OutlinedButton.icon(
                 onPressed: () async {
-                  final res = await FilePicker.platform.pickFiles(type: FileType.any);
-                  if (res != null && res.files.single.path != null) {
-                    setDialogState(() => selectedPath = res.files.single.path);
+                  final file = await FilePicker.pickFile(type: FileType.any);
+                  if (file != null && file.path != null) {
+                    setDialogState(() => selectedPath = file.path);
                   }
                 },
                 icon: const Icon(Icons.folder_open),

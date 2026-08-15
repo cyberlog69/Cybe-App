@@ -163,10 +163,8 @@ class SecureDnsVpnService {
   /// Open file picker to import `.ovpn` OpenVPN configuration profile
   static Future<VpnProfile?> importOvpnProfile() async {
     try {
-      final res = await FilePicker.platform.pickFiles(type: FileType.any);
-      if (res == null || res.files.isEmpty) return null;
-      final file = res.files.first;
-      if (file.path == null) return null;
+      final file = await FilePicker.pickFile(type: FileType.any);
+      if (file == null || file.path == null) return null;
 
       final content = await File(file.path!).readAsString();
       if (!content.contains('client') && !content.contains('remote')) {

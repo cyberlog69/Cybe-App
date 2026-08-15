@@ -51,9 +51,9 @@ class _QrInspectorScreenState extends State<QrInspectorScreen>
 
   Future<void> _pickImageFromGallery() async {
     try {
-      final res = await FilePicker.platform.pickFiles(type: FileType.image);
-      if (res != null && res.files.single.path != null) {
-        final path = res.files.single.path!;
+      final file = await FilePicker.pickFile(type: FileType.image);
+      if (file != null && file.path != null) {
+        final path = file.path!;
         final capture = await _scannerController.analyzeImage(path);
         if (capture != null && capture.barcodes.isNotEmpty) {
           final raw = capture.barcodes.first.rawValue;

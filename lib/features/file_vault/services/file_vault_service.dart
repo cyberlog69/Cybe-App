@@ -187,7 +187,7 @@ class FileVaultService {
     final tempDir = await getTemporaryDirectory();
     final outPath = '${tempDir.path}/${entry.name}';
     await File(outPath).writeAsBytes(decBytes);
-    await Share.shareXFiles([XFile(outPath)], text: 'Decrypted from Cybe Vault');
+    await SharePlus.instance.share(ShareParams(files: [XFile(outPath)], text: 'Decrypted from Cybe Vault'));
   }
 
   /// Permanently removes the encrypted file and its Hive metadata entry.
