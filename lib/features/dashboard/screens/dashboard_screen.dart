@@ -286,7 +286,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Cybe is an all-in-one mobile security & privacy suite built for Android and iOS.',
+              'Cybe is an all-in-one mobile security & privacy suite built for Android.',
               style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 16),

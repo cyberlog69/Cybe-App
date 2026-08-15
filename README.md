@@ -1,17 +1,26 @@
 # 🔐 Cybe Security Suite
 
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Desktop%20Relay%20(Win%2FLinux)-blue?style=for-the-badge&logo=android)](https://flutter.dev)
+[![Platform](https://img.shields.io/badge/Platform-Android%20(App)%20%7C%20Windows%20%26%20Linux%20(Relay)-blue?style=for-the-badge&logo=android)](https://flutter.dev)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x%20%7C%20Dart-02569B?style=for-the-badge&logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/cyberlog69/Cybe-App?style=for-the-badge&logo=github)](https://github.com/cyberlog69/Cybe-App/releases/latest)
 [![FOSS](https://img.shields.io/badge/FOSS-No%20Firebase%20%7C%20No%20GMS-brightgreen?style=for-the-badge)](FOSS_COMPLIANCE.md)
 [![F-Droid Ready](https://img.shields.io/badge/F--Droid-Ready-blue?style=for-the-badge&logo=fdroid)](fastlane/metadata/android/en-US/full_description.txt)
 
-A high-performance, open-source, offline-first mobile cyber-security suite built with **Flutter**, designed natively for **Android & iOS**, accompanied by a dedicated **Windows & Linux BitMesh Relay & GitHub Sync Daemon**.
+A high-performance, open-source, offline-first mobile cyber-security suite built with **Flutter for Android**, accompanied by a standalone **Windows & Linux BitMesh Relay & GitHub Sync Daemon**.
 
 Cybe provides: encrypted password & key management, RFC 6238 2FA TOTP token generation, dark web breach monitoring, off-grid peer-to-peer mesh messaging (**BitMesh**), real-time Man-in-the-Middle & ARP spoofing threat detection, encrypted DNS-over-HTTPS shield, cellular mobile network protection, antivirus & malware engine, hidden camera & bug detection, malicious QR inspection, anti-coercion self-destruct panic wiping, live CISA/NVD cyber threat intelligence, app permission risk auditing, system security log streams, in-app GitHub update checker, and modern Material UI branding.
 
 > **Privacy First**: No analytics, no telemetry, no Firebase, no Google Play Services (GMS), no advertising SDKs. All data stays on your device, encrypted at rest.
+
+---
+
+## 📖 About the Project
+
+**Cybe** is engineered from the ground up as an all-in-one, sovereign mobile defense ecosystem. It pairs a native Android security application with an off-grid desktop relay daemon for full device protection, local encrypted storage, and ad-hoc communication without cellular or internet infrastructure.
+
+- **Primary Android App**: Target Android 16 (API 36) / Android 7.0+ (API 24+), zero GMS dependencies, fully compatible with de-Googled ROMs (GrapheneOS, CalyxOS, LineageOS).
+- **BitMesh Relay Node**: Cross-platform background service running on Windows & Linux PCs to route mesh messages, audit local directories, and automate GitHub APK update distribution.
 
 ---
 
@@ -20,7 +29,6 @@ Cybe provides: encrypted password & key management, RFC 6238 2FA TOTP token gene
 | Component | Target Platform | Instructions |
 |:---|:---|:---|
 | 📱 **Cybe Mobile App** | **Android** (API 24+ / Android 16 Ready) | [Download APK — GitHub Releases](https://github.com/cyberlog69/Cybe-App/releases/latest) |
-| 🍏 **Cybe Mobile App** | **iOS** (iOS 13.0+) | Build from source: `flutter build ipa --release` |
 | 🛰️ **BitMesh Desktop Relay & Sync** | **Windows & Linux** | Run standalone daemon: `cd tools/bitmesh_relay && ./start-relay.ps1` (or `.sh`) |
 
 ---
@@ -29,41 +37,41 @@ Cybe provides: encrypted password & key management, RFC 6238 2FA TOTP token gene
 
 | Icon | Module | Description | Target |
 |:---:|:---|:---|:---:|
-| 🛡️ | **Material UI Cyber Branding** | Unified Material 3 cyber security emblem, glowing neon gradients, and responsive header/hero components. | All |
-| 🔑 | **Password Manager** | AES-256 encrypted local vault, category filters, health audit & master key protection. | Mobile |
-| 🎲 | **PassGen Generator** | Offline Diceware Passphrase (~500 EFF wordlist) & Password Generator with entropy calculator & GPU crack time estimator. | Mobile |
-| 🔑 | **2FA Authenticator** | RFC 6238 TOTP 2FA code generator, 30s countdown ring, tap-to-copy & camera QR import. Per-device isolated seed store. | Mobile |
-| 🌐 | **Dark Web Monitor** | Privacy-preserving k-Anonymity SHA-1 password breach check (HaveIBeenPwned API) + email domain leak auditor. | Mobile |
-| 🔒 | **Secret Notes** | AES-256 encrypted notepad for recovery seeds, API keys & confidential notes with category chips & pinning. | Mobile |
-| 📁 | **Encrypted File Vault** | AES-256-GCM authenticated file encryption with background Isolate thread execution for sensitive documents & photos. | Mobile |
-| 📡 | **BitMesh Off-Grid Messaging** | Dual-transport P2P mesh: BLE (mobile-to-mobile) + LAN UDP/TCP (phone-to-phone/relay). AES-256-GCM encrypted chat, auto-discovery < 500ms. | Mobile & Relay |
+| 🛡️ | **Material UI Cyber Branding** | Unified Material 3 cyber security emblem, glowing neon gradients, and responsive header/hero components. | Android & Relay |
+| 🔑 | **Password Manager** | AES-256 encrypted local vault, category filters, health audit & master key protection. | Android |
+| 🎲 | **PassGen Generator** | Offline Diceware Passphrase (~500 EFF wordlist) & Password Generator with entropy calculator & GPU crack time estimator. | Android |
+| 🔑 | **2FA Authenticator** | RFC 6238 TOTP 2FA code generator, 30s countdown ring, tap-to-copy & camera QR import. Per-device isolated seed store. | Android |
+| 🌐 | **Dark Web Monitor** | Privacy-preserving k-Anonymity SHA-1 password breach check (HaveIBeenPwned API) + email domain leak auditor. | Android |
+| 🔒 | **Secret Notes** | AES-256 encrypted notepad for recovery seeds, API keys & confidential notes with category chips & pinning. | Android |
+| 📁 | **Encrypted File Vault** | AES-256-GCM authenticated file encryption with background Isolate thread execution for sensitive documents & photos. | Android |
+| 📡 | **BitMesh Off-Grid Messaging** | Dual-transport P2P mesh: BLE (mobile-to-mobile) + LAN UDP/TCP (phone-to-relay). AES-256-GCM encrypted chat, auto-discovery < 500ms. | Android & Relay |
 | 🛰️ | **BitMesh Desktop Relay Node** | Standalone zero-overhead daemon for Windows & Linux that bridges mobile mesh nodes, audits local folders, and syncs GitHub updates. | Windows • Linux |
 | 🛡️ | **Wi-Fi Threat Shield (MitM)** | Real-time ARP spoofing detector, SSL stripping HTTPS TLS probe, DNS hijacking check, cyber radar UI & auto-shield. | Android |
-| 🌐 | **Encrypted DNS Shield (DoH)** | Cloudflare (1.1.1.1), Google (8.8.8.8), OpenDNS (208.67.222.222) DNS-over-HTTPS resolver. `.ovpn` file importer & profile manager. | Mobile |
+| 🌐 | **Encrypted DNS Shield (DoH)** | Cloudflare (1.1.1.1), Google (8.8.8.8), OpenDNS (208.67.222.222) DNS-over-HTTPS resolver. `.ovpn` file importer & profile manager. | Android |
 | 📶 | **Cellular Network Protection** | Extends MitM threat detection to 4G/5G/LTE mobile data connections alongside Wi-Fi. | Android |
-| 🦠 | **Antivirus & Malware Scanner** | 4-layer proprietary heuristic engine: SHA-256 hash matching, YARA-style pattern heuristics, double-extension spoofing detection (`.pdf.exe`), ransomware extension guard. | Mobile |
-| 🛡️ | **Vulnerability & System Audit** | 13 deep OS hardening checks: Root/Jailbreak, emulator, security patch staleness, Biometric/PAM authentication, ADB developer mode, location permissions exposure. | Mobile |
-| 📁 | **Quarantine Vault** | Encrypted `.cybe_quarantine` isolation for infected files. Restore, inspect, or permanently destroy malware payloads. | Mobile |
-| 📸 | **Anti-Spyware Suite** | Magnetometer EMF bug detector, high-contrast IR pinhole lens glint finder & LAN subnet IP camera port scanner. | Mobile |
-| 🔍 | **Malicious QR Inspector** | Live camera viewport & gallery image picker, URL shortener unmasking (`bit.ly`), raw IP check, executable alert & Cyrillic homograph detector. | Mobile |
-| 🚨 | **Encrypted Duress Panic Wipe** | Anti-coercion defense: entering emergency Duress PIN triggers silent DOD 5220.22-M multi-pass vault & key destruction while opening a deceptive clean app. | Mobile |
-| 📰 | **Cyber Threat Intel & CVEs** | Live CISA Known Exploited Vulnerabilities (KEV) catalog API, NVD zero-day updates, CVSS v3.1 rating & offline Hive caching. | Mobile |
+| 🦠 | **Antivirus & Malware Scanner** | 4-layer proprietary heuristic engine: SHA-256 hash matching, YARA-style pattern heuristics, double-extension spoofing detection (`.pdf.exe`), ransomware extension guard. | Android |
+| 🛡️ | **Vulnerability & System Audit** | 13 deep OS hardening checks: Root detection, emulator check, security patch staleness, Biometric authentication, ADB developer mode, location permissions exposure. | Android |
+| 📁 | **Quarantine Vault** | Encrypted `.cybe_quarantine` isolation for infected files. Restore, inspect, or permanently destroy malware payloads. | Android |
+| 📸 | **Anti-Spyware Suite** | Magnetometer EMF bug detector, high-contrast IR pinhole lens glint finder & LAN subnet IP camera port scanner. | Android |
+| 🔍 | **Malicious QR Inspector** | Live camera viewport & gallery image picker, URL shortener unmasking (`bit.ly`), raw IP check, executable alert & Cyrillic homograph detector. | Android |
+| 🚨 | **Encrypted Duress Panic Wipe** | Anti-coercion defense: entering emergency Duress PIN triggers silent DOD 5220.22-M multi-pass vault & key destruction while opening a deceptive clean app. | Android |
+| 📰 | **Cyber Threat Intel & CVEs** | Live CISA Known Exploited Vulnerabilities (KEV) catalog API, NVD zero-day updates, CVSS v3.1 rating & offline Hive caching. | Android |
 | 📱 | **App Permission Guard** | Android `PackageManager` analysis, weighted risk score (0–100), threat badges (📷 🎙️ 📍 💬 👥), 1-tap System Settings navigation & OS sandbox fallback. | Android |
-| 📜 | **System Security Logs** | Real-time security event log stream, Hive persistence, severity filtering, inspector dialog & text export. | Mobile |
-| 🔗 | **Phishing URL Checker** | URL heuristic analysis, brand typosquatting detector & live web link preview. | Mobile |
-| 🖧 | **LAN Port Scanner** | TCP socket probing across common ports (FTP, SSH, Telnet, HTTP, HTTPS, SMB, UPnP, RDP), latency benchmarking & vulnerability alerts. | Mobile |
-| 🔑 | **SSH & API Key Vault** | Dedicated vault for SSH keys (RSA/Ed25519) and cloud API tokens with automatic SHA-256 key fingerprinting. | Mobile |
+| 📜 | **System Security Logs** | Real-time security event log stream, Hive persistence, severity filtering, inspector dialog & text export. | Android |
+| 🔗 | **Phishing URL Checker** | URL heuristic analysis, brand typosquatting detector & live web link preview. | Android |
+| 🖧 | **LAN Port Scanner** | TCP socket probing across common ports (FTP, SSH, Telnet, HTTP, HTTPS, SMB, UPnP, RDP), latency benchmarking & vulnerability alerts. | Android |
+| 🔑 | **SSH & API Key Vault** | Dedicated vault for SSH keys (RSA/Ed25519) and cloud API tokens with automatic SHA-256 key fingerprinting. | Android |
 | 🔌 | **USB Security Monitor** | Real-time USB device connection history, trust/block policies, hardware interface event logging. | Android |
-| 📊 | **Network Dashboard** | Real-time connection quality inspection, Wi-Fi SSID / local IP / Gateway monitoring, latency chart & DNS Lookup tool. | Mobile |
+| 📊 | **Network Dashboard** | Real-time connection quality inspection, Wi-Fi SSID / local IP / Gateway monitoring, latency chart & DNS Lookup tool. | Android |
 | 📶 | **Wi-Fi Threat Radar** | Detects open AP risks, weak WEP/WPA ciphers, and Evil Twin access point suspects. | Android |
-| 💾 | **Secure Clipboard Manager** | In-app 10-item memory-only clipboard history with auto-wipe on app lock/minimize. | Mobile |
-| ⚙️ | **Settings & Update Checker** | Material You theme switcher, auto-lock timeout, biometric preferences, Duress PIN, encrypted `.cybe` backup export/restore, and in-app GitHub update checker. | Mobile |
+| 💾 | **Secure Clipboard Manager** | In-app 10-item memory-only clipboard history with auto-wipe on app lock/minimize. | Android |
+| ⚙️ | **Settings & Update Checker** | Material You theme switcher, auto-lock timeout, biometric preferences, Duress PIN, encrypted `.cybe` backup export/restore, and in-app GitHub update checker. | Android |
 
 ---
 
 ## 🛰️ BitMesh Desktop Relay & GitHub Sync Daemon
 
-Located in [`tools/bitmesh_relay/`](tools/bitmesh_relay/), this standalone background tool bridges mobile nodes on local Wi-Fi / Ethernet networks and automates updates:
+Located in [`tools/bitmesh_relay/`](tools/bitmesh_relay/), this standalone background service bridges mobile nodes on local Wi-Fi / Ethernet networks and automates updates:
 
 - **LAN Relay Node**: Participates in UDP Multicast discovery (`239.255.0.100:42100`) and TCP packet forwarding to extend mobile BitMesh range.
 - **Folder Integrity & Security Analyzer**: Scans directories, computes SHA-256 checksums, and audits for leaked API keys or credentials.
@@ -86,8 +94,7 @@ chmod +x start-relay.sh
 
 ```
 Cybe-App/
-├── android/                         # Android Gradle build (Gradle 8.14, AGP 8.11.1, Java 21 LTS)
-├── ios/                             # iOS CocoaPods build
+├── android/                         # Native Android build (Gradle 8.14, AGP 8.11.1, Java 21 LTS)
 ├── assets/                          # App assets, icons & Material SVG logo
 ├── lib/
 │   ├── main.dart                    # App entrypoint, Hive init, MultiBlocProvider
@@ -148,13 +155,6 @@ flutter build apk --release
 adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
-### 🍏 Build iOS App
-
-```bash
-cd ios && pod install && cd ..
-flutter build ipa --release
-```
-
 ---
 
 ## 🔒 Security & Cryptography Design
@@ -166,7 +166,7 @@ flutter build ipa --release
 | **Anti-Coercion Panic Wipe** | DOD 5220.22-M multi-pass zero-fill + 64-byte random key destruction |
 | **Key Derivation** | PBKDF2-SHA256 — 100,000 iterations |
 | **Dark Web Lookups** | k-Anonymity: only 5-char SHA-1 prefix queried; plaintext never leaves device |
-| **Hardware Secure Storage** | Android KeyStore · iOS Keychain |
+| **Hardware Secure Storage** | Android KeyStore |
 | **BitMesh Encryption** | AES-256-GCM per-channel with PBKDF2 key derivation; BLE + LAN dual transport |
 | **DNS Privacy** | Cloudflare/Google/OpenDNS DNS-over-HTTPS (DoH) encrypted resolver |
 | **Antivirus Engine** | SHA-256 hash matching + YARA-style heuristics + double-extension spoofing detection + ransomware extension guard |

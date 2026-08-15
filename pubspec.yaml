@@ -1,5 +1,5 @@
 name: cybe_app
-description: Cybe - Your all-in-one mobile security suite for Android & iOS
+description: Cybe - Your all-in-one mobile security suite for Android
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -62,7 +62,6 @@ dependencies:
 
   # UI & Animations
   dynamic_color: ^1.7.0
-  cupertino_icons: ^1.0.8
 
   fl_chart: ^1.2.0
   lottie: ^3.1.3

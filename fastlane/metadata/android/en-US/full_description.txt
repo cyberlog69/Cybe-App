@@ -1,4 +1,4 @@
-Cybe is a high-performance, open-source, offline-first cyber-security suite built with Flutter. It runs natively on Android, iOS, Windows, macOS, and Linux — with zero reliance on Firebase, Google Play Services (GMS), or any proprietary cloud services.
+Cybe is a high-performance, open-source, offline-first mobile cyber-security suite built with Flutter for Android, accompanied by a BitMesh desktop relay for Windows & Linux — with zero reliance on Firebase, Google Play Services (GMS), or any proprietary cloud services.
 
 ## 🔐 23-Module Security Suite
 
